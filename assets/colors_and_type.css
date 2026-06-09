@@ -1,0 +1,230 @@
+/* ============================================================
+   Jungle Design System — Foundations
+   Colors + Type tokens used across all Jungle surfaces.
+   Source of truth: jungle.baby codebase (app/globals.css),
+   Figma "Jungle - New UI", brand colour swatches.
+   ============================================================ */
+
+/* ---------- Feather Bold (display face) ---------- */
+@font-face {
+  font-family: "Feather Bold";
+  src:
+    url("fonts/Feather-Bold.woff2") format("woff2"),
+    url("fonts/Feather-Bold.woff") format("woff"),
+    url("fonts/Feather-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Manrope (primary UI face) + Inter (secondary UI face) — served from
+   Google Fonts when used in HTML. Declared here for reference. */
+
+:root {
+  /* ========== BRAND PALETTE (primary) ========== */
+  /* From the brand colour swatches. "Jungle Green" is the anchor. */
+  --jb-green-900: #0c3c26;        /* deep "Jungle" — hero gradient base, emphasis text */
+  --jb-green-800: #1a4122;        /* pill bg, strong text on light */
+  --jb-green-700: #156641;        /* brand primary #1 (from palette) */
+  --jb-green-600: #04722f;        /* btn-green hover */
+  --jb-green-500: #009b4d;        /* BRAND PRIMARY — CTA, links, accents */
+  --jb-green-400: #46b100;        /* toggle "on", active state */
+  --jb-green-300: #4db404;        /* bright accent */
+  --jb-green-200: #58cc05;        /* bright success */
+  --jb-green-100: #e5f5ed;        /* banner bg, chip bg, selected row */
+  --jb-olive-700: #21321c;        /* slider thumb, dark earthy text */
+  --jb-olive-600: #647b4e;        /* progress track, earthy accents */
+  --jb-olive-500: #657b4e;        /* body accent text */
+
+  /* Warm neutrals — the "off-white" marketplace feel */
+  --jb-cream-100: #ecebe4;        /* brand off-white (from palette) */
+  --jb-cream-50:  #f5f5f0;        /* panel bg, warm page bg */
+  --jb-paper:     #ffffff;        /* pure paper */
+
+  /* Secondary / signal colors (from brand palette) */
+  --jb-yellow:    #eec71b;        /* J-logo yellow / highlight */
+  --jb-orange:    #ffa51f;        /* secondary accent */
+  --jb-red:       #f63f3c;        /* error / destructive */
+  --jb-blue:      #0795ed;        /* info, links alt */
+  --jb-lime:      #88c45a;        /* fresh secondary */
+  --jb-plum:      #ab5f99;        /* rare accent */
+  --jb-navy:      #223559;        /* rare accent */
+
+  /* ========== NEUTRALS ========== */
+  --jb-ink-900:   #0e0e11;        /* headings on light */
+  --jb-ink-800:   #181818;        /* brand black (from palette) */
+  --jb-ink-700:   #222222;        /* body text strong */
+  --jb-ink-600:   #333333;        /* body */
+  --jb-ink-500:   #666666;        /* body default (nextjs body color) */
+  --jb-ink-400:   #697282;        /* placeholder */
+  --jb-ink-300:   #858585;        /* muted */
+  --jb-ink-200:   #b9b9b9;        /* divider strong */
+  --jb-ink-150:   #dddddd;        /* border default */
+  --jb-ink-100:   #eaeaea;        /* hairline */
+  --jb-ink-75:    #f1f1f1;        /* hairline alt (nav border) */
+  --jb-ink-50:    #f5f5f7;        /* subtle surface */
+
+  /* ========== SEMANTIC TOKENS ========== */
+  --bg-page:       var(--jb-paper);
+  --bg-warm:       var(--jb-cream-50);
+  --bg-elevated:   var(--jb-paper);
+  --bg-subtle:     var(--jb-ink-50);
+  --bg-banner:     var(--jb-green-100);
+
+  --fg-default:    var(--jb-ink-500);     /* matches site body */
+  --fg-strong:     var(--jb-ink-700);
+  --fg-heading:    var(--jb-green-900);   /* deep green on hero / marketing */
+  --fg-muted:      var(--jb-ink-400);
+  --fg-inverse:    var(--jb-paper);
+  --fg-brand:      var(--jb-green-500);
+  --fg-link:       var(--jb-green-500);
+
+  --border-subtle: var(--jb-ink-75);
+  --border-default:var(--jb-ink-150);
+  --border-strong: var(--jb-ink-200);
+  --border-focus:  var(--jb-green-500);
+
+  /* Primary action */
+  --action-primary-bg:      var(--jb-green-500);
+  --action-primary-bg-hover:var(--jb-green-600);
+  --action-primary-fg:      var(--jb-paper);
+
+  /* Secondary / outline action */
+  --action-outline-fg:      var(--jb-green-500);
+  --action-outline-border:  var(--jb-green-500);
+  --action-outline-bg-hover:var(--jb-green-500);
+
+  /* Signal */
+  --signal-success-bg:     var(--jb-green-100);
+  --signal-success-fg:     var(--jb-green-900);
+  --signal-error:          var(--jb-red);
+  --signal-warning:        var(--jb-orange);
+  --signal-info:           var(--jb-blue);
+
+  /* Shadows */
+  --shadow-xs:  0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm:  0 2px 8px rgba(0,0,0,.06);
+  --shadow-md:  0 6px 16px rgba(0,0,0,.08);
+  --shadow-lg:  0 12px 32px rgba(0,0,0,.12);
+  --shadow-hero:0 -2px 40px rgba(0,0,0,.15);
+
+  /* Radii */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;           /* buttons, inputs, cards */
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Spacing (4px scale) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Container widths (matches site breakpoints) */
+  --container-narrow: 1256px;
+  --container-wide:   1400px;
+  --container-max:    1920px;
+
+  /* ========== TYPE FACES ========== */
+  --font-display: "Feather Bold", "Fraunces", "DM Serif Display", Georgia, serif;
+  --font-sans:    "Manrope", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-ui:      "Inter", "Manrope", system-ui, sans-serif;
+  --font-mono:    ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Weights */
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+
+  /* Type scale — based on Figma usage frequency */
+  --fs-xs:    12px;
+  --fs-sm:    14px;   /* body S, captions */
+  --fs-base:  16px;   /* body M */
+  --fs-md:    18px;
+  --fs-lg:    20px;
+  --fs-xl:    22px;
+  --fs-2xl:   24px;   /* section heading on cards */
+  --fs-3xl:   28px;
+  --fs-4xl:   36px;
+  --fs-5xl:   48px;   /* hero H1 (desktop) */
+  --fs-6xl:   56px;
+
+  --lh-tight:  1.05;
+  --lh-snug:   1.15;
+  --lh-normal: 1.35;
+  --lh-body:   1.5;
+}
+
+/* ============================================================
+   SEMANTIC TYPOGRAPHY — use these on elements directly.
+   ============================================================ */
+html, body {
+  background: var(--bg-page);
+  color: var(--fg-default);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Display — Feather Bold. The hero's signature style. */
+.jb-display,
+.feather-bold-font {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg-heading);
+}
+
+/* Display scale (Feather Bold) */
+.jb-h1 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-5xl); line-height: 56px; letter-spacing: -0.01em; }
+.jb-h2 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-4xl); line-height: 1.15; letter-spacing: -0.005em; }
+.jb-h3 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-2xl); line-height: 1.2; }
+.jb-h4 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl); line-height: 1.25; }
+
+/* Sans headers — Manrope Bold, used in section headers & card titles */
+.jb-section-title  { font-family: var(--font-sans); font-weight: 700; font-size: var(--fs-2xl); color: var(--jb-ink-800); }
+.jb-card-title     { font-family: var(--font-sans); font-weight: 700; font-size: var(--fs-md); color: var(--jb-ink-700); }
+.jb-eyebrow        { font-family: var(--font-sans); font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; letter-spacing: .08em; color: var(--jb-green-700); }
+
+/* Body */
+.jb-body-lg { font-family: var(--font-sans); font-weight: 400; font-size: var(--fs-md); line-height: var(--lh-body); color: var(--fg-default); }
+.jb-body    { font-family: var(--font-sans); font-weight: 400; font-size: var(--fs-base); line-height: var(--lh-body); color: var(--fg-default); }
+.jb-body-sm { font-family: var(--font-sans); font-weight: 400; font-size: var(--fs-sm); line-height: var(--lh-body); color: var(--fg-default); }
+.jb-caption { font-family: var(--font-sans); font-weight: 500; font-size: var(--fs-xs); line-height: 1.4; color: var(--fg-muted); }
+
+/* Label / UI microcopy */
+.jb-label   { font-family: var(--font-sans); font-weight: 600; font-size: var(--fs-sm); color: var(--jb-ink-700); }
+.jb-price   { font-family: var(--font-sans); font-weight: 700; font-size: var(--fs-md); color: var(--jb-ink-800); }
+
+/* Link */
+.jb-link { color: var(--fg-link); text-decoration: none; }
+.jb-link:hover { text-decoration: underline; }
+
+/* Button base reset — consume with .jb-btn--primary / .jb-btn--outline */
+.jb-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 48px; padding: 0 24px;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans); font-weight: 500; font-size: 16px;
+  border: none; cursor: pointer;
+  transition: all 200ms ease;
+}
+.jb-btn--primary   { background: var(--action-primary-bg); color: var(--action-primary-fg); }
+.jb-btn--primary:hover   { background: var(--action-primary-bg-hover); }
+.jb-btn--outline   { background: transparent; color: var(--action-outline-fg); border: 2px solid var(--action-outline-border); }
+.jb-btn--outline:hover   { background: var(--action-outline-bg-hover); color: var(--fg-inverse); }
+.jb-btn--pill      { border-radius: var(--radius-pill); font-weight: 700; }
+.jb-btn--sm        { height: 36px; padding: 0 16px; font-size: 14px; }
