@@ -60,7 +60,7 @@ export function FilterDropdown({label, options, value, onChange, open, setOpen})
   return (
     <div style={{position:'relative'}}>
       <button onClick={()=>setOpen(open?null:label)} style={{display:'inline-flex', alignItems:'center', gap:7, height:42, padding:'0 14px', borderRadius:9999, border:'1px solid '+(active?'#009B4D':'#DDDDDD'), background: active?'#E5F5ED':'#fff', color: active?'#0C3C26':'#333', fontFamily:'Manrope,sans-serif', fontSize:14, fontWeight: active?700:600, cursor:'pointer', whiteSpace:'nowrap', transition:'all 150ms ease'}}>
-        {active ? sel.label : label}
+        {active ? (sel ? sel.label : value) : label}
         <span style={{transform:open===label?'rotate(180deg)':'none', transition:'transform 150ms ease', display:'inline-flex', opacity:.7}}>{Ico.chev(15,'down')}</span>
       </button>
       {open===label && (
@@ -172,9 +172,6 @@ export function Browse({go, tweaks, onShare, initialFilters}) {
                 </span>
                 Show expired
               </button>}
-            <button onClick={()=>setShowMap(s=>!s)} style={{display:'inline-flex', alignItems:'center', gap:8, height:42, padding:'0 16px', borderRadius:9999, border:'1px solid '+(showMap?'#009B4D':'#DDD'), background: showMap?'#E5F5ED':'#fff', color: showMap?'#0C3C26':'#333', fontFamily:'inherit', fontSize:14, fontWeight:700, cursor:'pointer'}}>
-              {Ico.map(17)} {showMap?'Hide map':'Show map'}
-            </button>
           </div>
         </div>
       </div>

@@ -15,6 +15,8 @@ import { EventDetail } from './_components/EventDetail.jsx';
 import { Deals } from './_components/Deals.jsx';
 import { SubmitListing } from './_components/SubmitListing.jsx';
 import { ShareModal } from './_components/ShareModal.jsx';
+import { Contact } from './_components/Contact.jsx';
+import { AboutUs } from './_components/AboutUs.jsx';
 import {
   useTweaks, TweaksPanel, TweakSection,
   TweakToggle, TweakRadio,
@@ -77,6 +79,7 @@ export default function App(){
   const [wizard, setWizard] = useState(false);
   const [prefilter, setPrefilter] = useState({});
   const [submitType, setSubmitType] = useState('activity');
+  const [dealsCategory, setDealsCategory] = useState(null);
 
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem('sg-screen') : null;
@@ -85,9 +88,14 @@ export default function App(){
 
   const go = (s, payload)=>{
     if (s==='browse' && payload && payload.wizard){ setWizard(true); return; }
-    if (s==='browse' && !(payload && payload.keepFilters)) setPrefilter({});
+    if (s==='browse' && payload && payload.filters) {
+      setPrefilter(payload.filters);
+    } else if (s==='browse' && !(payload && payload.keepFilters)) {
+      setPrefilter({});
+    }
     if (s==='detail') setEvent(payload);
     if (s==='submit') setSubmitType(payload && payload.type ? payload.type : 'activity');
+    if (s==='deals') setDealsCategory(payload && payload.category ? payload.category : null);
     setScreen(s);
     if (typeof window !== 'undefined') { localStorage.setItem('sg-screen', s); window.scrollTo(0,0); }
   };
@@ -104,8 +112,10 @@ export default function App(){
       {screen==='landing' && <Landing go={go} themeKey={t.heroColor} showStickers={t.heroStickers} homeLayout={t.homeLayout} onShare={setShareEvent}/>}
       {screen==='browse' && <Browse key={'browse-'+JSON.stringify(prefilter)} go={go} tweaks={t} onShare={setShareEvent} initialFilters={prefilter}/>}
       {screen==='detail' && <EventDetail go={go} event={event} onShare={setShareEvent}/>}
-      {screen==='deals' && <Deals go={go} tweaks={t}/>}
+      {screen==='deals' && <Deals go={go} tweaks={t} initialCategory={dealsCategory}/>}
       {screen==='submit' && <SubmitListing go={go} initialType={submitType}/>}
+      {screen==='contact' && <Contact />}
+      {screen==='about' && <AboutUs />}
 
       {screen!=='landing' && <Footer go={go}/>}
 

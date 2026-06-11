@@ -159,14 +159,15 @@ function FlagLink({ onFlag, flagged, sub }) {
 // ============================================================
 // Deals page
 // ============================================================
-export function Deals({ go, tweaks }) {
+export function Deals({ go, tweaks, initialCategory }) {
   const def = (tweaks && tweaks.dealsLayout) || 'list';
   const [layout, setLayout] = React.useState(def);
-  const [cat, setCat] = React.useState(null);
+  const [cat, setCat] = React.useState(initialCategory || null);
   const [sort, setSort] = React.useState('ending');
   const [votes, setVotes] = React.useState({});
   const [flags, setFlags] = React.useState({});
   React.useEffect(() => { setLayout((tweaks && tweaks.dealsLayout) || 'list'); }, [tweaks && tweaks.dealsLayout]);
+  React.useEffect(() => { setCat(initialCategory || null); }, [initialCategory]);
 
   const onVote = (id, dir) => setVotes((v) => ({ ...v, [id]: v[id] === dir ? null : dir }));
   const onFlag = (id) => setFlags((f) => ({ ...f, [id]: true }));

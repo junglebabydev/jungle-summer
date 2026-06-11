@@ -32,7 +32,7 @@ export function EventDetail({ go, event, onShare }) {
   { icon: Ico.ticket(20), label: 'Booking', value: e.bookingRequired ? 'Booking required' : 'Drop in, no booking needed' }].
   filter((r) => r.value);
 
-  function copyLink() {try {navigator.clipboard && navigator.clipboard.writeText(`https://jungle.baby/summer/${e.id}`);} catch (x) {}setCopied(true);setTimeout(() => setCopied(false), 1600);}
+  function copyLink() {try {navigator.clipboard && navigator.clipboard.writeText(`https://summer.jungle.baby/${e.id}`);} catch (x) {}setCopied(true);setTimeout(() => setCopied(false), 1600);}
 
   return (
     <div data-screen-label="03 Thing to do detail" style={{ background: '#fff', fontFamily: 'Manrope, sans-serif' }}>
@@ -51,23 +51,24 @@ export function EventDetail({ go, event, onShare }) {
           </div>
         }
 
-        {/* hero image — single image from the record, or Jungle logo fallback */}
-        <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', marginBottom: 24, aspectRatio: '16 / 9', maxHeight: 460, background: hasImg ? '#F5F5F0' : '#E5F5ED', filter: expired ? 'grayscale(0.85)' : 'none', opacity: expired ? 0.8 : 1 }}>
-          <img
-            src={imgSrc}
-            alt={e.title}
-            onError={() => setImgFailed(true)}
-            style={{ width: '100%', height: '100%', objectFit: hasImg ? 'cover' : 'contain', objectPosition: 'center', display: 'block', padding: hasImg ? 0 : '8% 20%' }}
-          />
-          <button onClick={() => go('browse')} style={{ position: 'absolute', top: 16, left: 16, display: 'inline-flex', alignItems: 'center', gap: 7, height: 42, padding: '0 16px', borderRadius: 9999, background: 'rgba(255,255,255,.95)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#0C3C26', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
-            {Ico.arrowL(18)} Back
-          </button>
-        </div>
-
-        {/* two columns */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.7fr) minmax(300px,1fr)', gap: 40, alignItems: 'start' }}>
-          {/* left */}
+        {/* main content grid with sticky sidebar */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(300px, 1fr)', gap: 40, alignItems: 'start' }}>
+          {/* left column - image and content */}
           <div>
+            {/* hero image — single image from the record, or Jungle logo fallback */}
+            <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', marginBottom: 24, aspectRatio: '16 / 9', maxHeight: 460, background: hasImg ? '#F5F5F0' : '#E5F5ED', filter: expired ? 'grayscale(0.85)' : 'none', opacity: expired ? 0.8 : 1 }}>
+              <img
+                src={imgSrc}
+                alt={e.title}
+                onError={() => setImgFailed(true)}
+                style={{ width: '100%', height: '100%', objectFit: hasImg ? 'cover' : 'contain', objectPosition: 'center', display: 'block', padding: hasImg ? 0 : '8% 20%' }}
+              />
+              <button onClick={() => go('browse')} style={{ position: 'absolute', top: 16, left: 16, display: 'inline-flex', alignItems: 'center', gap: 7, height: 42, padding: '0 16px', borderRadius: 9999, background: 'rgba(255,255,255,.95)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#0C3C26', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
+                {Ico.arrowL(18)} Back
+              </button>
+            </div>
+
+            {/* content starts here */}
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
               <span style={{ background: isFree ? '#EEC71B' : '#E5F5ED', color: isFree ? '#3a2e00' : '#0C3C26', fontSize: 12.5, fontWeight: 800, padding: '6px 12px', borderRadius: 9999 }}>{isFree ? 'Free' : e.type}</span>
               {e.festival && !expired && <span style={{ background: '#0C3C26', color: '#fff', fontSize: 12.5, fontWeight: 700, padding: '6px 12px', borderRadius: 9999 }}>Festival on now</span>}
@@ -111,7 +112,7 @@ export function EventDetail({ go, event, onShare }) {
             </div>
 
             <h2 style={blockH}>Where</h2>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 15, color: '#333', lineHeight: 1.5, maxWidth: 560 }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 15, color: '#333', lineHeight: 1.5, maxWidth: 560, marginBottom: 40 }}>
               <span style={{ color: '#009B4D', marginTop: 1 }}>{Ico.pin(18)}</span>
               <div>
                 <div style={{ fontWeight: 700, color: '#181818' }}>{e.venue}</div>
@@ -120,8 +121,8 @@ export function EventDetail({ go, event, onShare }) {
             </div>
           </div>
 
-          {/* right sidebar */}
-          <aside style={{ position: 'sticky', top: 96, alignSelf: 'start', border: '1px solid #EAEAEA', borderRadius: 20, padding: 24, background: '#fff', boxShadow: '0 6px 16px rgba(0,0,0,.06)' }} data-comment-anchor="47cfc22db8-aside-95-11">
+          {/* right sidebar - sticky */}
+          <aside style={{ position: 'sticky', top: 80, alignSelf: 'start', border: '1px solid #EAEAEA', borderRadius: 20, padding: 24, background: '#fff', boxShadow: '0 6px 16px rgba(0,0,0,.06)' }} data-comment-anchor="47cfc22db8-aside-95-11">
             {/* ── Pricing block ── */}
             <div style={{ marginBottom: 20 }}>
               {isFree && !expired && (

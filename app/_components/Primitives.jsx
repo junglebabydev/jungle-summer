@@ -27,7 +27,13 @@ export const Ico = {
   repeat: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m17 2 4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><path d="m7 22-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg>,
   ticket: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4 2 2 0 0 0 0-4z" /><path d="M13 6v12" strokeDasharray="2 3" /></svg>,
   globe: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18z" /></svg>,
-  external: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M21 3l-9 9" /><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" /></svg>
+  external: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M21 3l-9 9" /><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" /></svg>,
+  plus: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>,
+  help: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9 9a3 3 0 0 1 6 0c0 2-3 3-3 3M12 17h.01" /></svg>,
+  instagram: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" /><path d="m17.5 6.5h.01" /></svg>,
+  facebook: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>,
+  shield: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 3 7v8c0 3 2 6 9 10 7-4 9-7 9-10V7z" /></svg>,
+  users: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>
 };
 
 export function Button({ variant = 'primary', size = 'md', children, onClick, className = '', style = {} }) {
@@ -84,12 +90,11 @@ export function Nav({ go, theme }) {
       <img src={logoSrc} style={{ height: 34 }} alt="Jungle" />
     </div>
     <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 600 }}>
-      {[['Explore', 'browse'], ['Summer', 'landing'], ['Deals', 'deals'], ['Blogs', null], ['Contact', null], ['List with us', 'submit']].map(([l, route]) =>
+      {[['Explore', 'browse'], ['Summer', 'landing'], ['Deals', 'deals'], ['Contact', 'contact'], ['List with us', 'submit']].map(([l, route]) =>
       <a key={l} onClick={(e) => {e.preventDefault();if (route) go(route);}} href="#" style={{ color: fg, textDecoration: 'none', opacity: l === 'Summer' ? 1 : .82 }}>{l}</a>
       )}
     </nav>
     <div style={{ flex: 1 }} />
-    <Button size="sm" variant={transparent && !dark ? 'ghost' : 'primary'} onClick={() => go('browse')}>Sign in</Button>
   </div>;
 }
 
@@ -102,12 +107,23 @@ export function Footer({ go }) {
       </div>
       {[
       ['This summer', ['Free things to do', 'Festivals on now', 'Deals & promos', 'Shows']],
-      ['Discover', ['Classes', 'Camps', 'Birthdays', 'Blog']],
-      ['Company', ['About us', 'Newsletter', 'Contact', 'List with Jungle']]].
+      ['Discover', ['Classes', 'Camps']],
+      ['Company', ['About us', 'Contact', 'List with Jungle']]].
       map(([h, items]) =>
       <div key={h}>
           <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 14, color: '#fff' }}>{h}</div>
-          {items.map((i) => <div key={i} onClick={() => { if (!go) return; if (i === 'List with Jungle') go('submit'); else if (i === 'Deals & promos') go('deals'); }} style={{ fontSize: 14, marginBottom: 10, opacity: .75, cursor: 'pointer' }}>{i}</div>)}
+          {items.map((i) => <div key={i} onClick={() => { 
+            if (!go) return; 
+            if (i === 'List with Jungle') go('submit'); 
+            else if (i === 'Deals & promos') go('deals'); 
+            else if (i === 'Contact') go('contact'); 
+            else if (i === 'About us') go('about');
+            else if (i === 'Free things to do') go('browse', { filters: { price: 'free' } });
+            else if (i === 'Festivals on now') go('browse', { filters: { type: 'Festival' } });
+            else if (i === 'Shows') go('browse', { filters: { type: 'Show' } });
+            else if (i === 'Classes') go('deals', { category: 'Classes' });
+            else if (i === 'Camps') go('deals', { category: 'Camps' });
+          }} style={{ fontSize: 14, marginBottom: 10, opacity: .75, cursor: 'pointer' }}>{i}</div>)}
         </div>
       )}
     </div>

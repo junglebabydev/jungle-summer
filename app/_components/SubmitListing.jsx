@@ -7,6 +7,7 @@
 import React from 'react';
 import { Ico, Button, Chip, MetaPill } from './Primitives.jsx';
 import { FILTERS } from './data.jsx';
+import { DEAL_CATEGORIES } from './dealsData.jsx';
 
 // ---- small field primitives (scoped to this file) ----
 function Field({ label, hint, required, children, full }) {
