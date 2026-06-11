@@ -70,13 +70,59 @@ export function MetaPill({ children, tone = 'neutral' }) {
 }
 
 export function TopBanner({ go }) {
-  return <div style={{ height: 44, background: '#E5F5ED', color: '#0C3C26', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontFamily: 'Manrope, sans-serif' }}>
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ color: '#009B4D' }}>{Ico.sun(15)}</span>School holidays are here. Dozens of things on in June.</span>
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  
+  return <div style={{ 
+    minHeight: 44, 
+    background: '#E5F5ED', 
+    color: '#0C3C26', 
+    fontSize: isMobile ? 12 : 13, 
+    fontWeight: 600, 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    gap: isMobile ? 8 : 12, 
+    fontFamily: 'Manrope, sans-serif',
+    padding: isMobile ? '8px 12px' : '0 20px',
+    flexWrap: isMobile ? 'wrap' : 'nowrap',
+    textAlign: isMobile ? 'center' : 'left'
+  }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+      <span style={{ color: '#009B4D' }}>{Ico.sun(15)}</span>
+      {isMobile ? 'School holidays are here.' : 'School holidays are here. Dozens of things on in June.'}
+    </span>
     <a href="#" onClick={(e) => {e.preventDefault();go('browse');}} style={{ color: '#009B4D', fontWeight: 700, textDecoration: 'underline' }}>Browse things to do →</a>
   </div>;
 }
 
 export function Nav({ go, theme }) {
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  
+  React.useEffect(() => {
+    if (menuOpen && isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen, isMobile]);
+  
   // theme null => solid white nav (browse/detail). Otherwise transparent over hero.
   const t = theme || {};
   const transparent = !!theme;
@@ -85,25 +131,116 @@ export function Nav({ go, theme }) {
   const logoSrc = transparent && !t.logoColor ? '/assets/brand/logo-monochrome-light.png' : '/assets/brand/logo-color-primary.png';
   const pillBg = !transparent ? '#E5F5ED' : dark ? 'rgba(12,60,38,.10)' : 'rgba(255,255,255,.18)';
   const pillBd = !transparent ? '#CDEBD9' : dark ? 'rgba(12,60,38,.25)' : 'rgba(255,255,255,.45)';
-  return <div style={{ position: 'sticky', top: 0, zIndex: 30, height: 72, background: transparent ? 'transparent' : '#fff', borderBottom: transparent ? 'none' : '1px solid #F1F1F1', display: 'flex', alignItems: 'center', padding: '0 clamp(20px,4vw,48px)', gap: 28, color: fg, fontFamily: 'Manrope, sans-serif' }} data-comment-anchor="06a71433c1-div-77-11">
-    <div onClick={() => go('landing')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-      <img src={logoSrc} style={{ height: 34 }} alt="Jungle" />
-    </div>
-    <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 600 }}>
-      {[['Explore', 'browse'], ['Summer', 'landing'], ['Deals', 'deals'], ['Contact', 'contact'], ['List with us', 'submit']].map(([l, route]) =>
-      <a key={l} onClick={(e) => {e.preventDefault();if (route) go(route);}} href="#" style={{ color: fg, textDecoration: 'none', opacity: l === 'Summer' ? 1 : .82 }}>{l}</a>
+  
+  return (
+    <>
+      <div style={{ 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 30, 
+        height: isMobile ? 60 : 72, 
+        background: transparent ? 'transparent' : '#fff', 
+        borderBottom: transparent ? 'none' : '1px solid #F1F1F1', 
+        display: 'flex', 
+        alignItems: 'center', 
+        padding: isMobile ? '0 16px' : '0 clamp(20px,4vw,48px)', 
+        gap: isMobile ? 12 : 28, 
+        color: fg, 
+        fontFamily: 'Manrope, sans-serif' 
+      }} data-comment-anchor="06a71433c1-div-77-11">
+        <div onClick={() => go('landing')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img src={logoSrc} style={{ height: isMobile ? 28 : 34 }} alt="Jungle" />
+        </div>
+        
+        {!isMobile ? (
+          <>
+            <nav style={{ display: 'flex', gap: 24, fontSize: 14, fontWeight: 600 }}>
+              {[['Explore', 'browse'], ['Summer', 'landing'], ['Deals', 'deals'], ['Contact', 'contact'], ['List with us', 'submit']].map(([l, route]) =>
+              <a key={l} onClick={(e) => {e.preventDefault();if (route) go(route);}} href="#" style={{ color: fg, textDecoration: 'none', opacity: l === 'Summer' ? 1 : .82 }}>{l}</a>
+              )}
+            </nav>
+            <div style={{ flex: 1 }} />
+          </>
+        ) : (
+          <>
+            <div style={{ flex: 1 }} />
+            <button 
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4,
+                alignItems: 'flex-end'
+              }}
+            >
+              <span style={{ width: 24, height: 2, background: fg, borderRadius: 1, transition: 'all 200ms' }} />
+              <span style={{ width: menuOpen ? 24 : 18, height: 2, background: fg, borderRadius: 1, transition: 'all 200ms' }} />
+              <span style={{ width: menuOpen ? 24 : 14, height: 2, background: fg, borderRadius: 1, transition: 'all 200ms' }} />
+            </button>
+          </>
+        )}
+      </div>
+      
+      {isMobile && menuOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 60,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: '#fff',
+          overflowY: 'auto',
+          zIndex: 29,
+          fontFamily: 'Manrope, sans-serif',
+          paddingTop: '40px'
+        }}>
+          {[['Explore', 'browse'], ['Summer', 'landing'], ['Deals', 'deals'], ['Contact', 'contact'], ['List with us', 'submit']].map(([l, route], index) =>
+            <a 
+              key={l} 
+              onClick={(e) => {
+                e.preventDefault();
+                if (route) go(route);
+                setMenuOpen(false);
+              }} 
+              href="#" 
+              style={{ 
+                display: 'block',
+                padding: '14px 24px',
+                color: '#0C3C26',
+                textDecoration: 'none',
+                fontSize: 15,
+                fontWeight: 600,
+                borderTop: index === 0 ? 'none' : '1px solid #F5F5F0'
+              }}
+            >
+              {l}
+            </a>
+          )}
+        </div>
       )}
-    </nav>
-    <div style={{ flex: 1 }} />
-  </div>;
+    </>
+  );
 }
 
 export function Footer({ go }) {
-  return <footer style={{ background: '#0C3C26', color: '#E5F5ED', padding: '56px clamp(20px,4vw,48px) 32px', fontFamily: 'Manrope, sans-serif' }}>
-    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40, maxWidth: 1256, margin: '0 auto' }}>
+  const [isMobile, setIsMobile] = React.useState(false);
+  
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  
+  return <footer style={{ background: '#0C3C26', color: '#E5F5ED', padding: isMobile ? '40px 20px 24px' : '56px clamp(20px,4vw,48px) 32px', fontFamily: 'Manrope, sans-serif' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? 32 : 40, maxWidth: 1256, margin: '0 auto' }}>
       <div>
-        <img src="/assets/brand/logo-monochrome-light.png" style={{ height: 42, marginBottom: 16 }} alt="Jungle" />
-        <p style={{ fontSize: 14, opacity: .8, maxWidth: 340, lineHeight: 1.6 }}>Singapore's guide to kids' activities, camps and things to do. Made for parents, by parents.</p>
+        <img src="/assets/brand/logo-monochrome-light.png" style={{ height: isMobile ? 36 : 42, marginBottom: 16 }} alt="Jungle" />
+        <p style={{ fontSize: 14, opacity: .8, maxWidth: isMobile ? '100%' : 340, lineHeight: 1.6 }}>Singapore's guide to kids' activities, camps and things to do. Made for parents, by parents.</p>
       </div>
       {[
       ['This summer', ['Free things to do', 'Festivals on now', 'Deals & promos', 'Shows']],
@@ -127,8 +264,8 @@ export function Footer({ go }) {
         </div>
       )}
     </div>
-    <div style={{ borderTop: '1px solid rgba(255,255,255,.12)', paddingTop: 20, display: 'flex', justifyContent: 'space-between', fontSize: 12, opacity: .6, maxWidth: 1256, margin: '44px auto 0' }}>
-      <span>© 2026 Jungle Singapore Pte Ltd</span>
+    <div style={{ borderTop: '1px solid rgba(255,255,255,.12)', paddingTop: 20, display: isMobile ? 'block' : 'flex', justifyContent: 'space-between', fontSize: 12, opacity: .6, maxWidth: 1256, margin: isMobile ? '32px auto 0' : '44px auto 0', textAlign: isMobile ? 'center' : 'left' }}>
+      <span style={{ display: 'block', marginBottom: isMobile ? 8 : 0 }}>© 2026 Jungle Singapore Pte Ltd</span>
       <span>Privacy · Terms · Cookies</span>
     </div>
   </footer>;

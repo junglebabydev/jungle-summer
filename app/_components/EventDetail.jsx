@@ -15,6 +15,16 @@ export function EventDetail({ go, event, onShare }) {
   const expired = e.status === 'expired';
   const [copied, setCopied] = React.useState(false);
   const [imgFailed, setImgFailed] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+  
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   // "All ages" reads oddly with a "y.o" suffix; only append it for real age ranges.
   const isAllAges = (e.age && e.age.includes('all')) || /all ages/i.test(e.ageLabel || '');
   const ageText = isAllAges ? e.ageLabel : `${e.ageLabel} y.o`;
@@ -36,9 +46,9 @@ export function EventDetail({ go, event, onShare }) {
 
   return (
     <div data-screen-label="03 Thing to do detail" style={{ background: '#fff', fontFamily: 'Manrope, sans-serif' }}>
-      <div style={{ maxWidth: 1256, margin: '0 auto', padding: '20px clamp(20px,4vw,48px) 80px' }}>
+      <div style={{ maxWidth: 1256, margin: '0 auto', padding: isMobile ? '16px 16px 60px' : '20px clamp(20px,4vw,48px) 80px' }}>
         {/* breadcrumb */}
-        <div style={{ fontSize: 13, color: '#666', marginBottom: 14 }}>
+        <div style={{ fontSize: isMobile ? 12 : 13, color: '#666', marginBottom: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isMobile ? 'nowrap' : 'normal' }}>
           <a href="#" onClick={(x) => {x.preventDefault();go('landing');}} style={crumb}>Summer in SG</a> · <a href="#" onClick={(x) => {x.preventDefault();go('browse');}} style={crumb}>Things to do</a> · <span>{e.title}</span>
         </div>
 
@@ -51,19 +61,19 @@ export function EventDetail({ go, event, onShare }) {
           </div>
         }
 
-        {/* main content grid with sticky sidebar */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.7fr) minmax(300px, 1fr)', gap: 40, alignItems: 'start' }}>
+        {/* main content grid with sticky sidebar - responsive */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'minmax(0, 1.7fr) minmax(300px, 1fr)', gap: isMobile ? 20 : 40, alignItems: 'start' }}>
           {/* left column - image and content */}
           <div>
             {/* hero image — single image from the record, or Jungle logo fallback */}
-            <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', marginBottom: 24, aspectRatio: '16 / 9', maxHeight: 460, background: hasImg ? '#F5F5F0' : '#E5F5ED', filter: expired ? 'grayscale(0.85)' : 'none', opacity: expired ? 0.8 : 1 }}>
+            <div style={{ position: 'relative', borderRadius: isMobile ? 12 : 20, overflow: 'hidden', marginBottom: isMobile ? 20 : 24, aspectRatio: '16 / 9', maxHeight: isMobile ? 240 : 460, background: hasImg ? '#F5F5F0' : '#E5F5ED', filter: expired ? 'grayscale(0.85)' : 'none', opacity: expired ? 0.8 : 1 }}>
               <img
                 src={imgSrc}
                 alt={e.title}
                 onError={() => setImgFailed(true)}
                 style={{ width: '100%', height: '100%', objectFit: hasImg ? 'cover' : 'contain', objectPosition: 'center', display: 'block', padding: hasImg ? 0 : '8% 20%' }}
               />
-              <button onClick={() => go('browse')} style={{ position: 'absolute', top: 16, left: 16, display: 'inline-flex', alignItems: 'center', gap: 7, height: 42, padding: '0 16px', borderRadius: 9999, background: 'rgba(255,255,255,.95)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#0C3C26', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
+              <button onClick={() => go('browse')} style={{ position: 'absolute', top: isMobile ? 12 : 16, left: isMobile ? 12 : 16, display: 'inline-flex', alignItems: 'center', gap: 7, height: isMobile ? 36 : 42, padding: isMobile ? '0 12px' : '0 16px', borderRadius: 9999, background: 'rgba(255,255,255,.95)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: isMobile ? 13 : 14, color: '#0C3C26', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
                 {Ico.arrowL(18)} Back
               </button>
             </div>
@@ -73,8 +83,8 @@ export function EventDetail({ go, event, onShare }) {
               <span style={{ background: isFree ? '#EEC71B' : '#E5F5ED', color: isFree ? '#3a2e00' : '#0C3C26', fontSize: 12.5, fontWeight: 800, padding: '6px 12px', borderRadius: 9999 }}>{isFree ? 'Free' : e.type}</span>
               {e.festival && !expired && <span style={{ background: '#0C3C26', color: '#fff', fontSize: 12.5, fontWeight: 700, padding: '6px 12px', borderRadius: 9999 }}>Festival on now</span>}
             </div>
-            <h1 style={{ fontFamily: '"Feather Bold", serif', fontSize: 'clamp(28px,4vw,40px)', color: '#0C3C26', margin: '0 0 6px', lineHeight: 1.08 }}>{e.title}</h1>
-            <div style={{ fontSize: 15.5, color: '#666', marginBottom: 14 }}>by <span style={{ color: '#009B4D', fontWeight: 700 }}>{e.provider}</span></div>
+            <h1 style={{ fontFamily: '"Feather Bold", serif', fontSize: isMobile ? 26 : 'clamp(28px,4vw,40px)', color: '#0C3C26', margin: '0 0 6px', lineHeight: 1.08 }}>{e.title}</h1>
+            <div style={{ fontSize: isMobile ? 14 : 15.5, color: '#666', marginBottom: 14 }}>by <span style={{ color: '#009B4D', fontWeight: 700 }}>{e.provider}</span></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 26, paddingBottom: 24, borderBottom: '1px solid #F1F1F1' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14.5, color: '#444', fontWeight: 600 }}><span style={{ color: '#009B4D' }}>{Ico.pin(16)}</span>{e.venue}</span>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -84,8 +94,8 @@ export function EventDetail({ go, event, onShare }) {
               </div>
             </div>
 
-            <h2 style={blockH}>About</h2>
-            <p style={{ fontSize: 16, color: '#333', lineHeight: 1.65, margin: '0 0 18px', maxWidth: 640 }}>{e.longBlurb || e.blurb}</p>
+            <h2 style={{ ...blockH, fontSize: isMobile ? 20 : blockH.fontSize }}>About</h2>
+            <p style={{ fontSize: isMobile ? 15 : 16, color: '#333', lineHeight: 1.65, margin: '0 0 18px', maxWidth: isMobile ? '100%' : 640 }}>{e.longBlurb || e.blurb}</p>
 
             {e.promo && !expired &&
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#FFF8E1', border: '1px dashed #EEC71B', borderRadius: 12, padding: '10px 14px', marginBottom: 24 }}>
@@ -98,8 +108,8 @@ export function EventDetail({ go, event, onShare }) {
               {e.tags.map((t) => <MetaPill key={t} tone="green">{t}</MetaPill>)}
             </div>
 
-            <h2 style={blockH}>When</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px,1fr))', gap: 10, maxWidth: 560, marginBottom: 32 }}>
+            <h2 style={{ ...blockH, fontSize: isMobile ? 20 : blockH.fontSize }}>When</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(220px,1fr))', gap: 10, maxWidth: isMobile ? '100%' : 560, marginBottom: 32 }}>
               {when.map((r, i) =>
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', border: '1px solid #EEE', borderRadius: 14, background: '#fff' }}>
                   <span style={{ width: 40, height: 40, borderRadius: 10, background: '#E5F5ED', color: '#009B4D', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{r.icon}</span>
@@ -111,8 +121,8 @@ export function EventDetail({ go, event, onShare }) {
               )}
             </div>
 
-            <h2 style={blockH}>Where</h2>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: 15, color: '#333', lineHeight: 1.5, maxWidth: 560, marginBottom: 40 }}>
+            <h2 style={{ ...blockH, fontSize: isMobile ? 20 : blockH.fontSize }}>Where</h2>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, fontSize: isMobile ? 14 : 15, color: '#333', lineHeight: 1.5, maxWidth: isMobile ? '100%' : 560, marginBottom: isMobile ? 32 : 40 }}>
               <span style={{ color: '#009B4D', marginTop: 1 }}>{Ico.pin(18)}</span>
               <div>
                 <div style={{ fontWeight: 700, color: '#181818' }}>{e.venue}</div>
@@ -121,30 +131,30 @@ export function EventDetail({ go, event, onShare }) {
             </div>
           </div>
 
-          {/* right sidebar - sticky */}
-          <aside style={{ position: 'sticky', top: 80, alignSelf: 'start', border: '1px solid #EAEAEA', borderRadius: 20, padding: 24, background: '#fff', boxShadow: '0 6px 16px rgba(0,0,0,.06)' }} data-comment-anchor="47cfc22db8-aside-95-11">
+          {/* right sidebar - sticky on desktop, static on mobile */}
+          <aside style={{ position: isMobile ? 'static' : 'sticky', top: 80, alignSelf: 'start', border: '1px solid #EAEAEA', borderRadius: isMobile ? 16 : 20, padding: isMobile ? 20 : 24, background: '#fff', boxShadow: '0 6px 16px rgba(0,0,0,.06)', marginTop: isMobile ? 20 : 0 }} data-comment-anchor="47cfc22db8-aside-95-11">
             {/* ── Pricing block ── */}
             <div style={{ marginBottom: 20 }}>
               {isFree && !expired && (
-                <div style={{ fontFamily: '"Feather Bold", serif', fontSize: 36, color: '#009B4D', lineHeight: 1, marginBottom: 4 }}>Free</div>
+                <div style={{ fontFamily: '"Feather Bold", serif', fontSize: isMobile ? 28 : 36, color: '#009B4D', lineHeight: 1, marginBottom: 4 }}>Free</div>
               )}
               {isPaid && !expired && (
-                <div style={{ fontFamily: '"Feather Bold", serif', fontSize: 36, color: '#0C3C26', lineHeight: 1, marginBottom: 4 }}>{pi.display}</div>
+                <div style={{ fontFamily: '"Feather Bold", serif', fontSize: isMobile ? 28 : 36, color: '#0C3C26', lineHeight: 1, marginBottom: 4 }}>{pi.display}</div>
               )}
               {isMixed && !expired && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginBottom: 4 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', background: '#E5F5ED', borderRadius: 12 }}>
-                    <span style={{ fontFamily: '"Feather Bold", serif', fontSize: 24, color: '#009B4D', lineHeight: 1, flexShrink: 0 }}>Free</span>
+                    <span style={{ fontFamily: '"Feather Bold", serif', fontSize: isMobile ? 20 : 24, color: '#009B4D', lineHeight: 1, flexShrink: 0 }}>Free</span>
                     <span style={{ fontSize: 13.5, color: '#2a6040', fontWeight: 600, lineHeight: 1.35 }}>for {pi.freeFor}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', background: '#F7F7F5', borderRadius: 12 }}>
-                    <span style={{ fontFamily: '"Feather Bold", serif', fontSize: 22, color: '#0C3C26', lineHeight: 1, flexShrink: 0 }}>{pi.paidDisplay}</span>
+                    <span style={{ fontFamily: '"Feather Bold", serif', fontSize: isMobile ? 18 : 22, color: '#0C3C26', lineHeight: 1, flexShrink: 0 }}>{pi.paidDisplay}</span>
                     <span style={{ fontSize: 13.5, color: '#666', fontWeight: 500, lineHeight: 1.35 }}>for others{pi.note ? ` · ${pi.note}` : ''}</span>
                   </div>
                 </div>
               )}
               {expired && (
-                <div style={{ fontFamily: '"Feather Bold", serif', fontSize: 28, color: '#bbb', lineHeight: 1, marginBottom: 4 }}>Ended</div>
+                <div style={{ fontFamily: '"Feather Bold", serif', fontSize: isMobile ? 24 : 28, color: '#bbb', lineHeight: 1, marginBottom: 4 }}>Ended</div>
               )}
               {pi.fullText && (isPaid || isMixed) && !expired && pi.fullText !== pi.display && (
                 <div style={{ fontSize: 12.5, color: '#858585', marginTop: 8, lineHeight: 1.45 }}>{pi.fullText}</div>

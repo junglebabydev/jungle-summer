@@ -85,39 +85,42 @@ function UrgencyTag({ expiry }) {
 }
 
 // ---- one deal as a list row ----
-function DealRow({ deal, vote, onVote, onFlag, flagged }) {
+function DealRow({ deal, vote, onVote, onFlag, flagged, isMobile }) {
   return (
-    <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:20, alignItems:'center', background:'#fff', border:'1px solid #EAEAE4', borderRadius:18, padding:'20px 22px', boxShadow:'0 2px 8px rgba(0,0,0,.04)' }} className="deal-row">
+    <div style={{ display: isMobile ? 'flex' : 'grid', flexDirection: isMobile ? 'column' : undefined, gridTemplateColumns: isMobile ? undefined : '1fr auto', gap: isMobile ? 16 : 20, alignItems: isMobile ? 'stretch' : 'center', background:'#fff', border:'1px solid #EAEAE4', borderRadius: isMobile ? 14 : 18, padding: isMobile ? '16px' : '20px 22px', boxShadow:'0 2px 8px rgba(0,0,0,.04)' }} className="deal-row">
       <div style={{ minWidth:0 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap', marginBottom:9 }}>
+        <div style={{ display:'flex', alignItems:'center', gap: isMobile ? 8 : 10, flexWrap:'wrap', marginBottom: isMobile ? 8 : 9 }}>
           <UrgencyTag expiry={deal.expiry} />
-          <span style={{ fontSize:13, fontWeight:700, color:'#009B4D' }}>{deal.discountLabel}</span>
-          <span style={{ fontSize:12.5, color:'#B7B7AE' }}>·</span>
-          <span style={{ fontSize:13, color:'#888' }}>{deal.category}</span>
+          <span style={{ fontSize: isMobile ? 12 : 13, fontWeight:700, color:'#009B4D' }}>{deal.discountLabel}</span>
+          {!isMobile && <><span style={{ fontSize:12.5, color:'#B7B7AE' }}>·</span>
+          <span style={{ fontSize:13, color:'#888' }}>{deal.category}</span></> }
         </div>
-        <div style={{ fontSize:13.5, fontWeight:700, color:'#0C3C26', marginBottom:3 }}>{deal.merchant}</div>
-        <h3 style={{ fontFamily:'"Feather Bold", serif', fontSize:20, color:'#181818', margin:'0 0 7px', lineHeight:1.2 }}>{deal.headline}</h3>
-        <p style={{ fontSize:14, color:'#666', lineHeight:1.5, margin:'0 0 14px', maxWidth:620 }}>{deal.detail}</p>
-        <div style={{ display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
+        <div style={{ fontSize: isMobile ? 12.5 : 13.5, fontWeight:700, color:'#0C3C26', marginBottom:3 }}>{deal.merchant}</div>
+        <h3 style={{ fontFamily:'"Feather Bold", serif', fontSize: isMobile ? 17 : 20, color:'#181818', margin:'0 0 7px', lineHeight:1.2 }}>{deal.headline}</h3>
+        <p style={{ fontSize: isMobile ? 13 : 14, color:'#666', lineHeight:1.5, margin:'0 0 14px', maxWidth: isMobile ? '100%' : 620 }}>{deal.detail}</p>
+        <div style={{ display:'flex', alignItems:'center', gap: isMobile ? 10 : 14, flexWrap:'wrap' }}>
           <PromoCode code={deal.promo} />
-          <span style={{ display:'inline-flex', alignItems:'center', gap:6, fontSize:13, color:'#777' }}>
+          <span style={{ display:'inline-flex', alignItems:'center', gap:6, fontSize: isMobile ? 12 : 13, color:'#777' }}>
             <span style={{ color:'#009B4D', display:'inline-flex' }}>{Ico.pin(14)}</span>{deal.location}{deal.area && deal.area!=='Online' ? ` · ${deal.area}` : ''}
           </span>
         </div>
       </div>
-      <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', justifyContent:'space-between', gap:16, height:'100%' }} className="deal-row-side">
-        <SubmitterBadge type={deal.submittedByType} />
-        <VoteControl deal={deal} vote={vote} onVote={onVote} />
-        <FlagLink onFlag={onFlag} flagged={flagged} sub={`${deal.submittedBy} · ${submittedAgo(deal.submittedAt)}`} />
+      <div style={{ display:'flex', flexDirection: isMobile ? 'row' : 'column', alignItems: isMobile ? 'center' : 'flex-end', justifyContent:'space-between', gap: isMobile ? 12 : 16, height: isMobile ? 'auto' : '100%', borderTop: isMobile ? '1px solid #F0EFE9' : 'none', paddingTop: isMobile ? 14 : 0, marginTop: isMobile ? 8 : 0, flexWrap: isMobile ? 'wrap' : 'nowrap' }} className="deal-row-side">
+        {!isMobile && <SubmitterBadge type={deal.submittedByType} />}
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <VoteControl deal={deal} vote={vote} onVote={onVote} compact={isMobile} />
+          <FlagLink onFlag={onFlag} flagged={flagged} sub={isMobile ? null : `${deal.submittedBy} · ${submittedAgo(deal.submittedAt)}`} />
+        </div>
+        {isMobile && <div style={{ width: '100%' }}><SubmitterBadge type={deal.submittedByType} /></div>}
       </div>
     </div>
   );
 }
 
 // ---- one deal as a grid card ----
-function DealCard({ deal, vote, onVote, onFlag, flagged }) {
+function DealCard({ deal, vote, onVote, onFlag, flagged, isMobile }) {
   return (
-    <div style={{ display:'flex', flexDirection:'column', background:'#fff', border:'1px solid #EAEAE4', borderRadius:18, padding:22, boxShadow:'0 2px 8px rgba(0,0,0,.04)', height:'100%' }}>
+    <div style={{ display:'flex', flexDirection:'column', background:'#fff', border:'1px solid #EAEAE4', borderRadius: isMobile ? 14 : 18, padding: isMobile ? 18 : 22, boxShadow:'0 2px 8px rgba(0,0,0,.04)', height:'100%' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:10, marginBottom:13 }}>
         <UrgencyTag expiry={deal.expiry} />
         <SubmitterBadge type={deal.submittedByType} />
@@ -125,9 +128,9 @@ function DealCard({ deal, vote, onVote, onFlag, flagged }) {
       <div style={{ display:'inline-flex', alignSelf:'flex-start', alignItems:'center', gap:7, background:'#0C3C26', color:'#fff', borderRadius:10, padding:'6px 12px', fontSize:14, fontWeight:800, marginBottom:13 }}>
         <span style={{ color:'#9FE3BD', display:'inline-flex' }}>{Ico.ticket(15)}</span>{deal.discountLabel}
       </div>
-      <div style={{ fontSize:13, fontWeight:700, color:'#009B4D', marginBottom:4 }}>{deal.merchant}</div>
-      <h3 style={{ fontFamily:'"Feather Bold", serif', fontSize:19, color:'#181818', margin:'0 0 8px', lineHeight:1.2 }}>{deal.headline}</h3>
-      <p style={{ fontSize:13.5, color:'#666', lineHeight:1.5, margin:'0 0 14px' }}>{deal.detail}</p>
+      <div style={{ fontSize: isMobile ? 12 : 13, fontWeight:700, color:'#009B4D', marginBottom:4 }}>{deal.merchant}</div>
+      <h3 style={{ fontFamily:'"Feather Bold", serif', fontSize: isMobile ? 17 : 19, color:'#181818', margin:'0 0 8px', lineHeight:1.2 }}>{deal.headline}</h3>
+      <p style={{ fontSize: isMobile ? 12.5 : 13.5, color:'#666', lineHeight:1.5, margin:'0 0 14px' }}>{deal.detail}</p>
       <div style={{ display:'flex', flexDirection:'column', gap:9, marginBottom:16 }}>
         <PromoCode code={deal.promo} />
         <span style={{ display:'inline-flex', alignItems:'center', gap:6, fontSize:12.5, color:'#777' }}>
@@ -159,6 +162,115 @@ function FlagLink({ onFlag, flagged, sub }) {
 // ============================================================
 // Deals page
 // ============================================================
+// Sort dropdown component similar to FilterDropdown
+function SortDropdown({ value, onChange, isMobile }) {
+  const [open, setOpen] = React.useState(false);
+  const options = [
+    { k: 'ending', label: 'Ending soon' },
+    { k: 'top', label: 'Top rated' },
+    { k: 'new', label: 'Newest' }
+  ];
+  const sel = options.find(o => o.k === value);
+  
+  return (
+    <div style={{ position: 'relative' }}>
+      <button 
+        onClick={() => setOpen(!open)} 
+        style={{ 
+          display: 'inline-flex', 
+          alignItems: 'center', 
+          gap: 7, 
+          height: isMobile ? 36 : 42, 
+          padding: isMobile ? '0 12px' : '0 14px', 
+          borderRadius: 9999, 
+          border: '1px solid #DDDDDD', 
+          background: '#fff', 
+          color: '#333', 
+          fontFamily: 'Manrope,sans-serif', 
+          fontSize: isMobile ? 12.5 : 14, 
+          fontWeight: 600, 
+          cursor: 'pointer', 
+          whiteSpace: 'nowrap', 
+          transition: 'all 150ms ease'
+        }}
+      >
+        {sel ? sel.label : 'Sort'}
+        <span style={{ 
+          transform: open ? 'rotate(180deg)' : 'none', 
+          transition: 'transform 150ms ease', 
+          display: 'inline-flex', 
+          opacity: .7 
+        }}>
+          {Ico.chev(15, 'down')}
+        </span>
+      </button>
+      {open && (
+        <>
+          <div 
+            style={{ 
+              position: 'fixed', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              bottom: 0, 
+              zIndex: 28 
+            }} 
+            onClick={() => setOpen(false)} 
+          />
+          <div style={{ 
+            position: 'absolute', 
+            top: '100%', 
+            left: isMobile ? 0 : 'auto',
+            right: isMobile ? 'auto' : 0,
+            marginLeft: isMobile ? 16 : 0,
+            marginTop: 8, 
+            background: '#fff', 
+            border: '1px solid #E0E0E0', 
+            borderRadius: 14, 
+            boxShadow: '0 8px 24px rgba(0,0,0,.12)', 
+            padding: 8, 
+            minWidth: isMobile ? 160 : 180, 
+            zIndex: 29 
+          }}>
+            {options.map(o => (
+              <button 
+                key={o.k} 
+                onClick={() => { 
+                  onChange(o.k); 
+                  setOpen(false); 
+                }}
+                style={{ 
+                  display: 'block', 
+                  width: '100%', 
+                  textAlign: 'left', 
+                  padding: '10px 14px', 
+                  background: value === o.k ? '#E5F5ED' : 'transparent', 
+                  border: 'none', 
+                  borderRadius: 8, 
+                  color: value === o.k ? '#0C3C26' : '#333', 
+                  fontWeight: value === o.k ? 700 : 500, 
+                  fontSize: isMobile ? 13 : 14, 
+                  fontFamily: 'inherit', 
+                  cursor: 'pointer', 
+                  transition: 'background 120ms ease' 
+                }}
+                onMouseEnter={(e) => { 
+                  if (value !== o.k) e.currentTarget.style.background = '#F7F7F5'; 
+                }}
+                onMouseLeave={(e) => { 
+                  if (value !== o.k) e.currentTarget.style.background = 'transparent'; 
+                }}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export function Deals({ go, tweaks, initialCategory }) {
   const def = (tweaks && tweaks.dealsLayout) || 'list';
   const [layout, setLayout] = React.useState(def);
@@ -166,6 +278,15 @@ export function Deals({ go, tweaks, initialCategory }) {
   const [sort, setSort] = React.useState('ending');
   const [votes, setVotes] = React.useState({});
   const [flags, setFlags] = React.useState({});
+  const [isMobile, setIsMobile] = React.useState(false);
+  
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  
   React.useEffect(() => { setLayout((tweaks && tweaks.dealsLayout) || 'list'); }, [tweaks && tweaks.dealsLayout]);
   React.useEffect(() => { setCat(initialCategory || null); }, [initialCategory]);
 
@@ -190,13 +311,13 @@ export function Deals({ go, tweaks, initialCategory }) {
     <div data-screen-label="Deals" style={{ background:'#F5F5F0', minHeight:'100vh', fontFamily:'Manrope, sans-serif' }}>
       {/* hero band */}
       <div style={{ background:'#0C3C26', color:'#fff', position:'relative', overflow:'hidden' }}>
-        <img src="/assets/brand/graphic-02.svg" alt="" style={{ position:'absolute', right:-60, top:-40, width:320, color:'#0f4a2f', opacity:.5 }} />
-        <div style={{ maxWidth:1180, margin:'0 auto', padding:'44px clamp(20px,4vw,40px) 48px', position:'relative' }}>
-          <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(255,255,255,.12)', borderRadius:9999, padding:'6px 14px', fontSize:13, fontWeight:700, marginBottom:16 }}>
+        {!isMobile && <img src="/assets/brand/graphic-02.svg" alt="" style={{ position:'absolute', right:-60, top:-40, width:320, color:'#0f4a2f', opacity:.5 }} />}
+        <div style={{ maxWidth:1180, margin:'0 auto', padding: isMobile ? '32px 20px 36px' : '44px clamp(20px,4vw,40px) 48px', position:'relative' }}>
+          <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(255,255,255,.12)', borderRadius:9999, padding:'6px 14px', fontSize: isMobile ? 12 : 13, fontWeight:700, marginBottom:16 }}>
             <span style={{ color:'#EEC71B' }}>{Ico.ticket(15)}</span>{endingSoonCount} deals ending this week
           </div>
-          <h1 style={{ fontFamily:'"Feather Bold", serif', fontSize:'clamp(32px,4.6vw,46px)', margin:'0 0 12px', lineHeight:1.05, maxWidth:680 }}>Deals on kids' experiences</h1>
-          <p style={{ fontSize:17, lineHeight:1.55, opacity:.9, margin:'0 0 24px', maxWidth:560 }}>
+          <h1 style={{ fontFamily:'"Feather Bold", serif', fontSize: isMobile ? 28 : 'clamp(32px,4.6vw,46px)', margin:'0 0 12px', lineHeight:1.05, maxWidth: isMobile ? '100%' : 680 }}>Deals on kids' experiences</h1>
+          <p style={{ fontSize: isMobile ? 15 : 17, lineHeight:1.55, opacity:.9, margin:'0 0 24px', maxWidth: isMobile ? '100%' : 560 }}>
             Discounts and promo codes for classes, camps, attractions and more. Shared by merchants and parents. Vote up the good ones.
           </p>
           <Button variant="primary" onClick={() => go('submit', { type:'deal' })}>Submit a deal</Button>
@@ -204,53 +325,68 @@ export function Deals({ go, tweaks, initialCategory }) {
       </div>
 
       {/* controls */}
-      <div style={{ position:'sticky', top:72, zIndex:20, background:'rgba(245,245,240,.92)', backdropFilter:'blur(6px)', borderBottom:'1px solid #E6E5DE' }}>
-        <div style={{ maxWidth:1180, margin:'0 auto', padding:'14px clamp(20px,4vw,40px)', display:'flex', alignItems:'center', gap:14, flexWrap:'wrap' }}>
-          <div style={{ display:'flex', gap:8, flexWrap:'wrap', flex:1, minWidth:0 }}>
-            <Chip active={!cat} onClick={() => setCat(null)}>All</Chip>
-            {DEAL_CATEGORIES.map((c) => <Chip key={c.k} active={cat===c.k} onClick={() => setCat(cat===c.k?null:c.k)}>{c.label}</Chip>)}
-          </div>
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:7 }}>
-              <span style={{ fontSize:13, color:'#888', fontWeight:600 }}>Sort</span>
-              <select value={sort} onChange={(e) => setSort(e.target.value)}
-                style={{ appearance:'none', border:'1px solid #DDD', background:'#fff', borderRadius:10, padding:'9px 30px 9px 13px', fontSize:13.5, fontWeight:600, fontFamily:'inherit', color:'#0C3C26', cursor:'pointer', backgroundImage:'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'14\' height=\'14\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23666\' stroke-width=\'2.4\' stroke-linecap=\'round\'><path d=\'m6 9 6 6 6-6\'/></svg>")', backgroundRepeat:'no-repeat', backgroundPosition:'right 10px center' }}>
-                <option value="ending">Ending soon</option>
-                <option value="top">Top rated</option>
-                <option value="new">Newest</option>
-              </select>
+      <div style={{ position:'sticky', top: isMobile ? 60 : 72, zIndex:20, background:'rgba(245,245,240,.92)', backdropFilter:'blur(6px)', borderBottom:'1px solid #E6E5DE' }}>
+        <div style={{ maxWidth:1180, margin:'0 auto', padding: isMobile ? '12px 0' : '14px clamp(20px,4vw,40px)' }}>
+          {isMobile ? (
+            <>
+              <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch', scrollbarWidth:'none', msOverflowStyle:'none', paddingBottom: 8 }}>
+                <div style={{ display:'flex', gap: 6, padding: '0 16px', minWidth:'min-content' }}>
+                  <Chip active={!cat} onClick={() => setCat(null)} style={{ fontSize: 12, flexShrink: 0 }}>All</Chip>
+                  {DEAL_CATEGORIES.map((c) => <Chip key={c.k} active={cat===c.k} onClick={() => setCat(cat===c.k?null:c.k)} style={{ fontSize: 12, flexShrink: 0 }}>{c.label}</Chip>)}
+                </div>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:10, padding: '0 16px', justifyContent: 'space-between' }}>
+                <SortDropdown value={sort} onChange={setSort} isMobile={true} />
+                <div style={{ display:'flex', background:'#fff', border:'1px solid #DDD', borderRadius:10, padding:3, gap:2 }}>
+                  {[['list', Ico.tiles], ['grid', Ico.grid]].map(([k, ic]) => (
+                    <button key={k} onClick={() => setLayout(k)} title={k}
+                      style={{ width: 32, height: 28, borderRadius:8, border:'none', cursor:'pointer', display:'inline-flex', alignItems:'center', justifyContent:'center',
+                        background: layout===k ? '#E5F5ED' : 'transparent', color: layout===k ? '#009B4D' : '#9a9a92' }}>{ic(15)}</button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div style={{ display:'flex', alignItems:'center', gap: 14, flexWrap:'wrap' }}>
+              <div style={{ display:'flex', gap: 8, flexWrap:'wrap', flex:1, minWidth:0 }}>
+                <Chip active={!cat} onClick={() => setCat(null)}>All</Chip>
+                {DEAL_CATEGORIES.map((c) => <Chip key={c.k} active={cat===c.k} onClick={() => setCat(cat===c.k?null:c.k)}>{c.label}</Chip>)}
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                <SortDropdown value={sort} onChange={setSort} isMobile={false} />
+                <div style={{ display:'flex', background:'#fff', border:'1px solid #DDD', borderRadius:10, padding:3, gap:2 }}>
+                  {[['list', Ico.tiles], ['grid', Ico.grid]].map(([k, ic]) => (
+                    <button key={k} onClick={() => setLayout(k)} title={k}
+                      style={{ width: 36, height: 32, borderRadius:8, border:'none', cursor:'pointer', display:'inline-flex', alignItems:'center', justifyContent:'center',
+                        background: layout===k ? '#E5F5ED' : 'transparent', color: layout===k ? '#009B4D' : '#9a9a92' }}>{ic(17)}</button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div style={{ display:'flex', background:'#fff', border:'1px solid #DDD', borderRadius:10, padding:3, gap:2 }}>
-              {[['list', Ico.tiles], ['grid', Ico.grid]].map(([k, ic]) => (
-                <button key={k} onClick={() => setLayout(k)} title={k}
-                  style={{ width:36, height:32, borderRadius:8, border:'none', cursor:'pointer', display:'inline-flex', alignItems:'center', justifyContent:'center',
-                    background: layout===k ? '#E5F5ED' : 'transparent', color: layout===k ? '#009B4D' : '#9a9a92' }}>{ic(17)}</button>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
       {/* list / grid */}
-      <div style={{ maxWidth:1180, margin:'0 auto', padding:'24px clamp(20px,4vw,40px) 72px' }}>
-        <div style={{ fontSize:13.5, color:'#888', marginBottom:16, fontWeight:600 }}>{list.length} deal{list.length!==1?'s':''}{cat?` in ${cat}`:''}</div>
+      <div style={{ maxWidth:1180, margin:'0 auto', padding: isMobile ? '20px 16px 60px' : '24px clamp(20px,4vw,40px) 72px' }}>
+        <div style={{ fontSize: isMobile ? 12.5 : 13.5, color:'#888', marginBottom:16, fontWeight:600 }}>{list.length} deal{list.length!==1?'s':''}{cat?` in ${cat}`:''}</div>
         {layout === 'list' ? (
-          <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
-            {list.map((d) => <DealRow key={d.id} deal={d} vote={votes[d.id]} onVote={onVote} onFlag={() => onFlag(d.id)} flagged={!!flags[d.id]} />)}
+          <div style={{ display:'flex', flexDirection:'column', gap: isMobile ? 12 : 14 }}>
+            {list.map((d) => <DealRow key={d.id} deal={d} vote={votes[d.id]} onVote={onVote} onFlag={() => onFlag(d.id)} flagged={!!flags[d.id]} isMobile={isMobile} />)}
           </div>
         ) : (
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(300px, 1fr))', gap:18 }}>
-            {list.map((d) => <DealCard key={d.id} deal={d} vote={votes[d.id]} onVote={onVote} onFlag={() => onFlag(d.id)} flagged={!!flags[d.id]} />)}
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: isMobile ? 14 : 18 }}>
+            {list.map((d) => <DealCard key={d.id} deal={d} vote={votes[d.id]} onVote={onVote} onFlag={() => onFlag(d.id)} flagged={!!flags[d.id]} isMobile={isMobile} />)}
           </div>
         )}
 
         {/* submit prompt */}
-        <div style={{ marginTop:30, background:'#E5F5ED', border:'1px solid #CDEBD9', borderRadius:18, padding:'26px 28px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:20, flexWrap:'wrap' }}>
+        <div style={{ marginTop: isMobile ? 24 : 30, background:'#E5F5ED', border:'1px solid #CDEBD9', borderRadius: isMobile ? 14 : 18, padding: isMobile ? '20px' : '26px 28px', display:'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent:'space-between', gap: isMobile ? 16 : 20, flexWrap:'wrap', flexDirection: isMobile ? 'column' : 'row' }}>
           <div>
-            <h3 style={{ fontFamily:'"Feather Bold", serif', fontSize:21, color:'#0C3C26', margin:'0 0 5px' }}>Know a good deal?</h3>
-            <p style={{ fontSize:14.5, color:'#2f5641', margin:0, lineHeight:1.5 }}>Merchants and parents can both post. We review every deal before it goes live.</p>
+            <h3 style={{ fontFamily:'"Feather Bold", serif', fontSize: isMobile ? 18 : 21, color:'#0C3C26', margin:'0 0 5px' }}>Know a good deal?</h3>
+            <p style={{ fontSize: isMobile ? 13.5 : 14.5, color:'#2f5641', margin:0, lineHeight:1.5 }}>Merchants and parents can both post. We review every deal before it goes live.</p>
           </div>
-          <Button onClick={() => go('submit', { type:'deal' })}>Submit a deal</Button>
+          <Button onClick={() => go('submit', { type:'deal' })} style={{ width: isMobile ? '100%' : 'auto' }}>Submit a deal</Button>
         </div>
       </div>
     </div>
