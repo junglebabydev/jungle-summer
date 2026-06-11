@@ -4,6 +4,9 @@
 // ending-soon sort, submitter + verified/community signals,
 // report/flag. Submissions route to the "List with us" form.
 // ============================================================
+import React from 'react';
+import { DEALS, DEAL_CATEGORIES, SUBMITTER, daysLeft, expiryText, urgencyTone, netScore, submittedAgo } from './dealsData.jsx';
+import { Ico, Button, MetaPill, Chip } from './Primitives.jsx';
 
 // ---- trust badge (who submitted) ----
 function SubmitterBadge({ type }) {
@@ -156,7 +159,7 @@ function FlagLink({ onFlag, flagged, sub }) {
 // ============================================================
 // Deals page
 // ============================================================
-function Deals({ go, tweaks }) {
+export function Deals({ go, tweaks }) {
   const def = (tweaks && tweaks.dealsLayout) || 'list';
   const [layout, setLayout] = React.useState(def);
   const [cat, setCat] = React.useState(null);
@@ -186,7 +189,7 @@ function Deals({ go, tweaks }) {
     <div data-screen-label="Deals" style={{ background:'#F5F5F0', minHeight:'100vh', fontFamily:'Manrope, sans-serif' }}>
       {/* hero band */}
       <div style={{ background:'#0C3C26', color:'#fff', position:'relative', overflow:'hidden' }}>
-        <img src="assets/brand/graphic-02.svg" alt="" style={{ position:'absolute', right:-60, top:-40, width:320, color:'#0f4a2f', opacity:.5 }} />
+        <img src="/assets/brand/graphic-02.svg" alt="" style={{ position:'absolute', right:-60, top:-40, width:320, color:'#0f4a2f', opacity:.5 }} />
         <div style={{ maxWidth:1180, margin:'0 auto', padding:'44px clamp(20px,4vw,40px) 48px', position:'relative' }}>
           <div style={{ display:'inline-flex', alignItems:'center', gap:8, background:'rgba(255,255,255,.12)', borderRadius:9999, padding:'6px 14px', fontSize:13, fontWeight:700, marginBottom:16 }}>
             <span style={{ color:'#EEC71B' }}>{Ico.ticket(15)}</span>{endingSoonCount} deals ending this week
@@ -253,4 +256,3 @@ function Deals({ go, tweaks }) {
   );
 }
 
-window.Deals = Deals;

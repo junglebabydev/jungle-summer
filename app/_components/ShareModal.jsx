@@ -2,21 +2,52 @@
 // ShareModal — "Send to me" : Email | Phone tabs + confirmation
 // Used from cards (share sheet) and event detail.
 // ============================================================
-function ShareModal({event, onClose}) {
+import React from 'react';
+import { IMG } from './data.jsx';
+import { Ico, Button } from './Primitives.jsx';
+
+export function ShareModal({event, onClose}) {
   const [tab, setTab] = React.useState('email');
   const [email, setEmail] = React.useState('');
   const [phone, setPhone] = React.useState('');
   const [sent, setSent] = React.useState(null); // null | 'email' | 'phone'
   const [err, setErr] = React.useState('');
+  const [sending, setSending] = React.useState(false);
 
   const url = `jungle.baby/summer/${event ? event.id : ''}`;
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const phoneOk = phone.replace(/\D/g,'').length >= 8;
 
-  function send(kind){
+  async function send(kind){
+    if (sending) return;
     if (kind==='email' && !emailOk){ setErr('Enter a valid email address.'); return; }
     if (kind==='phone' && !phoneOk){ setErr('Enter a valid Singapore number.'); return; }
-    setErr(''); setSent(kind);
+    setErr('');
+    if (kind==='email'){
+      setSending(true);
+      try {
+        const res = await fetch('/api/share', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            email: email.trim(),
+            eventId: event ? event.id : '',
+            eventTitle: event ? event.title : '',
+            eventVenue: event ? event.venue : '',
+            eventArea: event ? event.area : '',
+          }),
+        });
+        const data = await res.json().catch(()=>({}));
+        if (!res.ok){ setErr(data.error || 'Could not send the email. Try again.'); return; }
+        setSent('email');
+      } catch {
+        setErr('Network error. Please try again.');
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+    setSent(kind); // phone: mock confirmation (no SMS provider wired)
   }
 
   // close on Esc
@@ -60,7 +91,7 @@ function ShareModal({event, onClose}) {
                 <label style={lbl}>Email address</label>
                 <input autoFocus value={email} onChange={e=>{setEmail(e.target.value); setErr('');}} onKeyDown={e=>e.key==='Enter'&&send('email')} placeholder="you@email.com" style={inp(err)}/>
                 {err && <div style={errStyle}>{err}</div>}
-                <Button style={{width:'100%', marginTop:14}} onClick={()=>send('email')}>Send link</Button>
+                <Button style={{width:'100%', marginTop:14, opacity: sending?0.7:1}} onClick={()=>send('email')}>{sending ? 'Sending…' : 'Send link'}</Button>
               </div>
             ) : (
               <div>
@@ -93,4 +124,3 @@ const lbl = {display:'block', fontSize:13, fontWeight:700, color:'#181818', marg
 const inp = (err)=>({width:'100%', height:50, border:`1px solid ${err?'#F63F3C':'#DDDDDD'}`, borderRadius:12, padding:'0 14px', fontFamily:'Manrope, sans-serif', fontSize:15, color:'#181818', background:'#fff', boxSizing:'border-box', outline:'none'});
 const errStyle = {color:'#F63F3C', fontSize:12.5, fontWeight:600, marginTop:7};
 
-window.ShareModal = ShareModal;

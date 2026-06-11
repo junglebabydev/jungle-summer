@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+.env*.local
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel
+
+# explicit: never commit the supabase service-key env (leaked once in d72a789)
+supabase/.env.local

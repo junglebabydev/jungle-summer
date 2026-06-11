@@ -1,6 +1,24 @@
+'use client';
+
 // ============================================================
 // App — router + shared state + Tweaks panel
+// Ported from Summer in SG.html SPA. Single-route shell that
+// flips between landing / browse / detail / deals / submit.
 // ============================================================
+
+import React, { useState, useEffect } from 'react';
+import { FILTERS } from './_components/data.jsx';
+import { Ico, Button, TopBanner, Nav, Footer } from './_components/Primitives.jsx';
+import { Landing, HERO_THEMES } from './_components/Landing.jsx';
+import { Browse } from './_components/Browse.jsx';
+import { EventDetail } from './_components/EventDetail.jsx';
+import { Deals } from './_components/Deals.jsx';
+import { SubmitListing } from './_components/SubmitListing.jsx';
+import { ShareModal } from './_components/ShareModal.jsx';
+import {
+  useTweaks, TweaksPanel, TweakSection,
+  TweakToggle, TweakRadio,
+} from './_components/tweaks-panel.jsx';
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "homeLayout": "focused",
@@ -13,10 +31,10 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 
 // ---- Family wizard (Get started) ----
 function FamilyWizard({onClose, onDone}) {
-  const [step, setStep] = React.useState(0);
-  const [age, setAge] = React.useState(null);
-  const [when, setWhen] = React.useState(null);
-  React.useEffect(()=>{ const h=(e)=>{ if(e.key==='Escape') onClose(); }; window.addEventListener('keydown',h); return ()=>window.removeEventListener('keydown',h); },[]);
+  const [step, setStep] = useState(0);
+  const [age, setAge] = useState(null);
+  const [when, setWhen] = useState(null);
+  useEffect(()=>{ const h=(e)=>{ if(e.key==='Escape') onClose(); }; window.addEventListener('keydown',h); return ()=>window.removeEventListener('keydown',h); },[]);
 
   const steps = [
     { q:'How old are your kids?', sub:'We will match the right age range.', opts:FILTERS.age, val:age, set:setAge },
@@ -40,7 +58,7 @@ function FamilyWizard({onClose, onDone}) {
         <div style={{display:'flex', gap:10}}>
           {step>0 && <Button variant="ghost" onClick={()=>setStep(step-1)}>Back</Button>}
           <Button style={{flex:1}} onClick={()=>{ if(step<steps.length-1){ setStep(step+1); } else { onDone({age, when}); } }}>
-            {step<steps.length-1 ? 'Next' : 'Show me what\u2019s on'}
+            {step<steps.length-1 ? 'Next' : 'Show me what’s on'}
           </Button>
         </div>
         <button onClick={()=>onDone({})} style={{width:'100%', marginTop:14, background:'transparent', border:'none', color:'#858585', fontFamily:'inherit', fontSize:13.5, fontWeight:600, cursor:'pointer'}}>Skip, just browse everything</button>
@@ -49,23 +67,31 @@ function FamilyWizard({onClose, onDone}) {
   );
 }
 
-function App(){
+export default function App(){
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-  const [screen, setScreen] = React.useState(()=> localStorage.getItem('sg-screen') || 'landing');
-  const [event, setEvent] = React.useState(null);
-  const [shareEvent, setShareEvent] = React.useState(null);
-  const [wizard, setWizard] = React.useState(false);
-  const [prefilter, setPrefilter] = React.useState({});
-  const [submitType, setSubmitType] = React.useState('activity');
+  // Hydration: initial render must match the server's (no localStorage).
+  // We mount with 'landing', then on the client restore the saved screen.
+  const [screen, setScreen] = useState('landing');
+  const [event, setEvent] = useState(null);
+  const [shareEvent, setShareEvent] = useState(null);
+  const [wizard, setWizard] = useState(false);
+  const [prefilter, setPrefilter] = useState({});
+  const [submitType, setSubmitType] = useState('activity');
+
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('sg-screen') : null;
+    if (saved && saved !== 'landing') setScreen(saved);
+  }, []);
 
   const go = (s, payload)=>{
     if (s==='browse' && payload && payload.wizard){ setWizard(true); return; }
     if (s==='browse' && !(payload && payload.keepFilters)) setPrefilter({});
     if (s==='detail') setEvent(payload);
     if (s==='submit') setSubmitType(payload && payload.type ? payload.type : 'activity');
-    setScreen(s); localStorage.setItem('sg-screen', s); window.scrollTo(0,0);
+    setScreen(s);
+    if (typeof window !== 'undefined') { localStorage.setItem('sg-screen', s); window.scrollTo(0,0); }
   };
-  window.__go = go;
+  if (typeof window !== 'undefined') window.__go = go;
 
   const heroTheme = HERO_THEMES[t.heroColor] || HERO_THEMES.green;
   const navTheme = screen==='landing' ? heroTheme.nav : null;
@@ -84,7 +110,7 @@ function App(){
       {screen!=='landing' && <Footer go={go}/>}
 
       {shareEvent && <ShareModal event={shareEvent} onClose={()=>setShareEvent(null)}/>}
-      {wizard && <FamilyWizard onClose={()=>setWizard(false)} onDone={(f)=>{ setPrefilter(f); setWizard(false); setScreen('browse'); localStorage.setItem('sg-screen','browse'); window.scrollTo(0,0); }}/>}
+      {wizard && <FamilyWizard onClose={()=>setWizard(false)} onDone={(f)=>{ setPrefilter(f); setWizard(false); setScreen('browse'); if (typeof window !== 'undefined') { localStorage.setItem('sg-screen','browse'); window.scrollTo(0,0); } }}/>}
 
       {/* ---- Tweaks panel ---- */}
       <TweaksPanel>
@@ -102,5 +128,3 @@ function App(){
     </div>
   );
 }
-
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);

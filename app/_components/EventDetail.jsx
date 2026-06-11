@@ -2,7 +2,11 @@
 // EventDetail — image grid + content + sticky sidebar
 // A "thing to do" detail page (PRD §5). No booking, no ratings.
 // ============================================================
-function EventDetail({ go, event, onShare }) {
+import React from 'react';
+import { EVENTS, IMG, IMG_FALLBACK, priceInfoFor } from './data.jsx';
+import { Ico, Button, MetaPill } from './Primitives.jsx';
+
+export function EventDetail({ go, event, onShare }) {
   const e = event || EVENTS[0];
   const pi = priceInfoFor(e);
   const isFree   = pi.type === 'free';
@@ -10,11 +14,15 @@ function EventDetail({ go, event, onShare }) {
   const isPaid   = pi.type === 'paid';
   const expired = e.status === 'expired';
   const [copied, setCopied] = React.useState(false);
-  const pool = ['p1', 'p2', 'p3', 'p4', 'p5', 'hero-img'].filter((x) => x !== e.img);
-  const grid = [e.img, pool[0], pool[1], pool[2], pool[3]];
+  const [imgFailed, setImgFailed] = React.useState(false);
+  // "All ages" reads oddly with a "y.o" suffix; only append it for real age ranges.
+  const isAllAges = (e.age && e.age.includes('all')) || /all ages/i.test(e.ageLabel || '');
+  const ageText = isAllAges ? e.ageLabel : `${e.ageLabel} y.o`;
+  const hasImg = !!e.img && !imgFailed;
+  const imgSrc = hasImg ? IMG(e.img) : IMG_FALLBACK;
 
-  // outbound visit-site URL, UTM-tagged per PRD §10
-  const visitUrl = `https://www.${(e.source || 'provider').toLowerCase().replace(/[^a-z0-9]+/g, '')}.sg/?utm_source=jungle&utm_medium=summer&utm_campaign=thing_to_do_${e.id}`;
+  // outbound visit-site URL — the provider's real listing page
+  const visitUrl = e.visitSiteUrl;
 
   // "When" facts straight from the things_to_do record
   const when = [
@@ -43,18 +51,16 @@ function EventDetail({ go, event, onShare }) {
           </div>
         }
 
-        {/* image grid */}
-        <div style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 8, height: 'min(58vw,460px)', borderRadius: 20, overflow: 'hidden', marginBottom: 24, filter: expired ? 'grayscale(0.85)' : 'none', opacity: expired ? 0.8 : 1 }}>
-          <div style={{ ...gridImg(grid[0]) }}>
-            <button onClick={() => go('browse')} style={{ position: 'absolute', top: 16, left: 16, display: 'inline-flex', alignItems: 'center', gap: 7, height: 42, padding: '0 16px', borderRadius: 9999, background: 'rgba(255,255,255,.95)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#0C3C26', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
-              {Ico.arrowL(18)} Back
-            </button>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', gap: 8 }}>
-            {grid.slice(1).map((g, i) => <div key={i} style={gridImg(g)} />)}
-          </div>
-          <button style={{ position: 'absolute', bottom: 16, right: 16, display: 'inline-flex', alignItems: 'center', gap: 8, height: 42, padding: '0 16px', borderRadius: 9999, background: 'rgba(255,255,255,.95)', border: '1px solid rgba(0,0,0,.06)', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#0C3C26', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
-            {Ico.photos(17)} Show all photos
+        {/* hero image — single image from the record, or Jungle logo fallback */}
+        <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', marginBottom: 24, aspectRatio: '16 / 9', maxHeight: 460, background: hasImg ? '#F5F5F0' : '#E5F5ED', filter: expired ? 'grayscale(0.85)' : 'none', opacity: expired ? 0.8 : 1 }}>
+          <img
+            src={imgSrc}
+            alt={e.title}
+            onError={() => setImgFailed(true)}
+            style={{ width: '100%', height: '100%', objectFit: hasImg ? 'cover' : 'contain', objectPosition: 'center', display: 'block', padding: hasImg ? 0 : '8% 20%' }}
+          />
+          <button onClick={() => go('browse')} style={{ position: 'absolute', top: 16, left: 16, display: 'inline-flex', alignItems: 'center', gap: 7, height: 42, padding: '0 16px', borderRadius: 9999, background: 'rgba(255,255,255,.95)', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700, fontSize: 14, color: '#0C3C26', boxShadow: '0 2px 8px rgba(0,0,0,.15)' }}>
+            {Ico.arrowL(18)} Back
           </button>
         </div>
 
@@ -68,12 +74,13 @@ function EventDetail({ go, event, onShare }) {
             </div>
             <h1 style={{ fontFamily: '"Feather Bold", serif', fontSize: 'clamp(28px,4vw,40px)', color: '#0C3C26', margin: '0 0 6px', lineHeight: 1.08 }}>{e.title}</h1>
             <div style={{ fontSize: 15.5, color: '#666', marginBottom: 14 }}>by <span style={{ color: '#009B4D', fontWeight: 700 }}>{e.provider}</span></div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', fontSize: 14.5, color: '#444', fontWeight: 600, marginBottom: 26, paddingBottom: 24, borderBottom: '1px solid #F1F1F1' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><span style={{ color: '#009B4D' }}>{Ico.pin(16)}</span>{e.venue}, {e.area}</span>
-              <span style={{ color: '#DDD' }}>·</span>
-              <span>{e.ageLabel} y.o</span>
-              <span style={{ color: '#DDD' }}>·</span>
-              <span>{e.indoorOutdoor}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 26, paddingBottom: 24, borderBottom: '1px solid #F1F1F1' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14.5, color: '#444', fontWeight: 600 }}><span style={{ color: '#009B4D' }}>{Ico.pin(16)}</span>{e.venue}</span>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {e.area && <MetaPill><span style={{ color: '#009B4D' }}>{Ico.pin(11)}</span>{e.area}</MetaPill>}
+                {e.ageLabel && <MetaPill>{ageText}</MetaPill>}
+                {e.indoorOutdoor && <MetaPill>{e.indoorOutdoor}</MetaPill>}
+              </div>
             </div>
 
             <h2 style={blockH}>About</h2>
@@ -151,7 +158,7 @@ function EventDetail({ go, event, onShare }) {
                 See what's on now
               </Button> :
 
-            <Button style={{ width: '100%' }} size="lg" onClick={() => window.open(visitUrl, '_blank')}>
+            <Button style={{ width: '100%' }} size="lg" onClick={() => visitUrl && window.open(visitUrl, '_blank', 'noopener,noreferrer')}>
                 {Ico.external(18)} Visit site
               </Button>
             }
@@ -175,6 +182,4 @@ function EventDetail({ go, event, onShare }) {
 
 const crumb = { color: '#009B4D', textDecoration: 'none', fontWeight: 600 };
 const blockH = { fontFamily: '"Feather Bold", serif', fontSize: 22, color: '#0C3C26', margin: '0 0 14px' };
-const gridImg = (name) => ({ position: 'relative', backgroundImage: `url(${IMG(name)})`, backgroundSize: 'cover', backgroundPosition: 'center', minHeight: 0 });
 
-window.EventDetail = EventDetail;

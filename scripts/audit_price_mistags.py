@@ -21,7 +21,7 @@ import re
 import sys
 from pathlib import Path
 
-DATA_JS = Path(__file__).resolve().parent.parent / "data.jsx"
+DATA_JS = Path(__file__).resolve().parent.parent / "app" / "_components" / "data.jsx"
 
 # A record block starts at "{id:'...'" and ends at the matching "}," at the
 # top level. Records here are conveniently single-statement objects with

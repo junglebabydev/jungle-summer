@@ -14,7 +14,7 @@ import re
 import sys
 from pathlib import Path
 
-DATA_JS = Path(__file__).resolve().parent.parent / "data.jsx"
+DATA_JS = Path(__file__).resolve().parent.parent / "app" / "_components" / "data.jsx"
 
 # ---- price parser (mirrors priceInfoFor in data.jsx) ----------------------
 

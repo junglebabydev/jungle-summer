@@ -1,7 +1,12 @@
 // ============================================================
 // MapPanel — stylized Singapore map with event pins (placeholder)
 // ============================================================
-function MapPanel({events, hoveredId, setHovered, onOpen, style={}}) {
+import React from 'react';
+import { EVENTS, ROWS, FILTERS, IMG, priceText } from './data.jsx';
+import { Ico, Button } from './Primitives.jsx';
+import { EventCard } from './EventCard.jsx';
+
+export function MapPanel({events, hoveredId, setHovered, onOpen, style={}}) {
   return (
     <div style={{position:'relative', width:'100%', height:'100%', borderRadius:18, overflow:'hidden', background:'linear-gradient(180deg,#dceaf2 0%,#cfe6ef 100%)', border:'1px solid #E2E8E2', ...style}}>
       {/* water texture dots */}
@@ -49,7 +54,7 @@ function MapPanel({events, hoveredId, setHovered, onOpen, style={}}) {
 // ============================================================
 // FilterDropdown — pill button that opens an options popover
 // ============================================================
-function FilterDropdown({label, options, value, onChange, open, setOpen}) {
+export function FilterDropdown({label, options, value, onChange, open, setOpen}) {
   const sel = options.find(o=>o.k===value);
   const active = !!value;
   return (
@@ -107,7 +112,7 @@ function Row({title, events, cardProps}) {
 // ============================================================
 // Browse / Results
 // ============================================================
-function Browse({go, tweaks, onShare, initialFilters}) {
+export function Browse({go, tweaks, onShare, initialFilters}) {
   const [filters, setFilters] = React.useState({age:null, when:null, area:null, price:null, type:null, ...(initialFilters||{})});
   const [openMenu, setOpenMenu] = React.useState(null);
   const [hoveredId, setHovered] = React.useState(null);
@@ -215,5 +220,3 @@ function Empty({clearAll}){
   </div>;
 }
 
-window.Browse = Browse;
-window.MapPanel = MapPanel;

@@ -1,10 +1,10 @@
 // ============================================================
 // Primitives — icons + shared controls for Summer in SG
 // ============================================================
-const { useState, useEffect, useRef } = React;
+import React, { useState, useEffect, useRef } from 'react';
 
 // ---- Icons (Lucide-style, 2px stroke, currentColor) ----
-const Ico = {
+export const Ico = {
   search: (s = 20) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>,
   pin: (s = 16) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s-8-7.5-8-13a8 8 0 1 1 16 0c0 5.5-8 13-8 13z" /><circle cx="12" cy="9" r="3" /></svg>,
   heart: (s = 18, filled = false) => <svg width={s} height={s} viewBox="0 0 24 24" fill={filled ? '#F63F3C' : 'none'} stroke={filled ? '#F63F3C' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1 7.8 7.8 7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z" /></svg>,
@@ -30,7 +30,7 @@ const Ico = {
   external: (s = 18) => <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6M21 3l-9 9" /><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6" /></svg>
 };
 
-function Button({ variant = 'primary', size = 'md', children, onClick, className = '', style = {} }) {
+export function Button({ variant = 'primary', size = 'md', children, onClick, className = '', style = {} }) {
   const base = { border: 'none', cursor: 'pointer', fontFamily: 'Manrope, sans-serif', fontWeight: 600, fontSize: size === 'sm' ? 14 : 16, borderRadius: 9999, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 200ms ease', whiteSpace: 'nowrap', boxSizing: 'border-box' };
   const sizes = { sm: { height: 40, padding: '0 18px' }, md: { height: 50, padding: '0 26px' }, lg: { height: 56, padding: '0 32px', fontSize: 17 } };
   const variants = {
@@ -50,12 +50,12 @@ function Button({ variant = 'primary', size = 'md', children, onClick, className
   style={{ ...base, ...sizes[size], ...variants[variant], ...style }}>{children}</button>;
 }
 
-function Chip({ active, children, onClick, style = {} }) {
+export function Chip({ active, children, onClick, style = {} }) {
   return <button onClick={onClick} style={{ background: active ? '#E5F5ED' : '#fff', border: '1px solid ' + (active ? '#009B4D' : '#DDDDDD'), color: active ? '#0C3C26' : '#333', borderRadius: 9999, padding: '8px 15px', fontSize: 13.5, fontWeight: active ? 700 : 500, cursor: 'pointer', fontFamily: 'Manrope, sans-serif', whiteSpace: 'nowrap', transition: 'all 160ms ease', ...style }}>{children}</button>;
 }
 
 // little category/meta pill used on cards & detail
-function MetaPill({ children, tone = 'neutral' }) {
+export function MetaPill({ children, tone = 'neutral' }) {
   const tones = {
     neutral: { bg: '#F5F5F0', fg: '#333', bd: '#EAEAEA' },
     green: { bg: '#E5F5ED', fg: '#0C3C26', bd: '#CDEBD9' }
@@ -63,20 +63,20 @@ function MetaPill({ children, tone = 'neutral' }) {
   return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: tones.bg, color: tones.fg, border: `1px solid ${tones.bd}`, borderRadius: 9999, padding: '5px 11px', fontSize: 12.5, fontWeight: 600, fontFamily: 'Manrope, sans-serif', whiteSpace: 'nowrap' }}>{children}</span>;
 }
 
-function TopBanner({ go }) {
+export function TopBanner({ go }) {
   return <div style={{ height: 44, background: '#E5F5ED', color: '#0C3C26', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, fontFamily: 'Manrope, sans-serif' }}>
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}><span style={{ color: '#009B4D' }}>{Ico.sun(15)}</span>School holidays are here. Dozens of things on in June.</span>
     <a href="#" onClick={(e) => {e.preventDefault();go('browse');}} style={{ color: '#009B4D', fontWeight: 700, textDecoration: 'underline' }}>Browse things to do →</a>
   </div>;
 }
 
-function Nav({ go, theme }) {
+export function Nav({ go, theme }) {
   // theme null => solid white nav (browse/detail). Otherwise transparent over hero.
   const t = theme || {};
   const transparent = !!theme;
   const fg = t.fg || '#0C3C26';
   const dark = t.fgIsDark; // text is dark green (yellow hero) -> use deep pills
-  const logoSrc = transparent && !t.logoColor ? 'assets/brand/logo-monochrome-light.png' : 'assets/brand/logo-color-primary.png';
+  const logoSrc = transparent && !t.logoColor ? '/assets/brand/logo-monochrome-light.png' : '/assets/brand/logo-color-primary.png';
   const pillBg = !transparent ? '#E5F5ED' : dark ? 'rgba(12,60,38,.10)' : 'rgba(255,255,255,.18)';
   const pillBd = !transparent ? '#CDEBD9' : dark ? 'rgba(12,60,38,.25)' : 'rgba(255,255,255,.45)';
   return <div style={{ position: 'sticky', top: 0, zIndex: 30, height: 72, background: transparent ? 'transparent' : '#fff', borderBottom: transparent ? 'none' : '1px solid #F1F1F1', display: 'flex', alignItems: 'center', padding: '0 clamp(20px,4vw,48px)', gap: 28, color: fg, fontFamily: 'Manrope, sans-serif' }} data-comment-anchor="06a71433c1-div-77-11">
@@ -93,11 +93,11 @@ function Nav({ go, theme }) {
   </div>;
 }
 
-function Footer({ go }) {
+export function Footer({ go }) {
   return <footer style={{ background: '#0C3C26', color: '#E5F5ED', padding: '56px clamp(20px,4vw,48px) 32px', fontFamily: 'Manrope, sans-serif' }}>
     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 40, maxWidth: 1256, margin: '0 auto' }}>
       <div>
-        <img src="assets/brand/logo-monochrome-light.png" style={{ height: 42, marginBottom: 16 }} alt="Jungle" />
+        <img src="/assets/brand/logo-monochrome-light.png" style={{ height: 42, marginBottom: 16 }} alt="Jungle" />
         <p style={{ fontSize: 14, opacity: .8, maxWidth: 340, lineHeight: 1.6 }}>Singapore's guide to kids' activities, camps and things to do. Made for parents, by parents.</p>
       </div>
       {[
@@ -118,4 +118,3 @@ function Footer({ go }) {
   </footer>;
 }
 
-Object.assign(window, { Ico, Button, Chip, MetaPill, TopBanner, Nav, Footer });

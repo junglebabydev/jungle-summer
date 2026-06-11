@@ -6,7 +6,12 @@
 // Hero colour is tweakable: green | coral | yellow
 // ============================================================
 
-const HERO_THEMES = {
+import React from 'react';
+import { EVENTS, ROWS, IMG, priceText } from './data.jsx';
+import { Ico, Button, MetaPill, Nav, Footer } from './Primitives.jsx';
+import { EventCard } from './EventCard.jsx';
+
+export const HERO_THEMES = {
   green: {
     key:'green',
     bg:'radial-gradient(120% 120% at 50% 0%, #15512f 0%, #0C3C26 38%, #082c1c 100%)',
@@ -149,7 +154,7 @@ function HeroCTAs({go, justify='center'}) {
 function LandingFocused({go, theme, showStickers}) {
   return (
     <div style={{minHeight:'100vh', background:theme.bg, display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'Manrope, sans-serif'}}>
-      <img src="assets/brand/graphic-01.svg" alt="" style={{position:'absolute', width:680, opacity:.07, top:-160, right:-160, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
+      <img src="/assets/brand/graphic-01.svg" alt="" style={{position:'absolute', width:680, opacity:.07, top:-160, right:-160, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
       <Nav go={go} theme={theme.nav}/>
       {showStickers && <FloatStickers/>}
       <div style={{flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'40px 20px 72px', position:'relative', zIndex:2}}>
@@ -178,7 +183,7 @@ function LandingEditorial({go, theme, cardProps}) {
   return (
     <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif'}}>
       <section style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
-        <img src="assets/brand/graphic-02.svg" alt="" style={{position:'absolute', width:520, opacity:.08, top:-120, right:-120, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
+        <img src="/assets/brand/graphic-02.svg" alt="" style={{position:'absolute', width:520, opacity:.08, top:-120, right:-120, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
         <Nav go={go} theme={theme.nav}/>
         <div style={{maxWidth:1256, margin:'0 auto', padding:'44px clamp(20px,4vw,48px) 64px', position:'relative', zIndex:2, textAlign:'center'}}>
           <div style={{display:'inline-flex', alignItems:'center', gap:8, whiteSpace:'nowrap', background: theme.key==='yellow'?'rgba(12,60,38,.10)':'rgba(255,255,255,.16)', border:`1px solid ${theme.key==='yellow'?'rgba(12,60,38,.22)':'rgba(255,255,255,.4)'}`, color:theme.nav.fg, borderRadius:9999, padding:'7px 15px', fontSize:13, fontWeight:700, marginBottom:22, backdropFilter:'blur(6px)'}}>
@@ -211,7 +216,7 @@ function LandingSpotlight({go, theme, cardProps}) {
   return (
     <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif'}}>
       <section style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
-        <img src="assets/brand/graphic-03.svg" alt="" style={{position:'absolute', width:560, opacity:.07, bottom:-180, left:-140, color: yellow?'#0C3C26':'#fff', pointerEvents:'none'}}/>
+        <img src="/assets/brand/graphic-03.svg" alt="" style={{position:'absolute', width:560, opacity:.07, bottom:-180, left:-140, color: yellow?'#0C3C26':'#fff', pointerEvents:'none'}}/>
         <Nav go={go} theme={theme.nav}/>
         <div style={{maxWidth:1256, margin:'0 auto', padding:'clamp(36px,5vw,64px) clamp(20px,4vw,48px) clamp(48px,6vw,72px)', position:'relative', zIndex:2, display:'grid', gridTemplateColumns:'minmax(0,1fr) minmax(0,460px)', gap:'clamp(28px,4vw,56px)', alignItems:'center'}}>
           {/* left */}
@@ -252,7 +257,7 @@ function LandingSpotlight({go, theme, cardProps}) {
 // ============================================================
 // Router
 // ============================================================
-function Landing({go, themeKey, showStickers=true, homeLayout='focused', onShare}) {
+export function Landing({go, themeKey, showStickers=true, homeLayout='focused', onShare}) {
   const theme = HERO_THEMES[themeKey] || HERO_THEMES.green;
   const cardProps = (e)=>({ onOpen:()=>go('detail', e), onShare:()=>onShare(e) });
   return (
@@ -264,4 +269,3 @@ function Landing({go, themeKey, showStickers=true, homeLayout='focused', onShare
   );
 }
 
-Object.assign(window, { Landing, HERO_THEMES });

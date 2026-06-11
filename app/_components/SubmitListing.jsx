@@ -4,6 +4,9 @@
 // review. Fields map to the things_to_do schema (PRD §6).
 // No backend: submit shows a confirmation state.
 // ============================================================
+import React from 'react';
+import { Ico, Button, Chip, MetaPill } from './Primitives.jsx';
+import { FILTERS } from './data.jsx';
 
 // ---- small field primitives (scoped to this file) ----
 function Field({ label, hint, required, children, full }) {
@@ -174,7 +177,7 @@ function TypeChooser({ value, onChange }) {
 // ============================================================
 // Main component
 // ============================================================
-function SubmitListing({ go, initialType }) {
+export function SubmitListing({ go, initialType }) {
   const [listingType, setListingType] = React.useState(initialType || 'activity');
   React.useEffect(() => { if (initialType) setListingType(initialType); }, [initialType]);
 
@@ -487,4 +490,3 @@ function SubmitListing({ go, initialType }) {
   );
 }
 
-window.SubmitListing = SubmitListing;

@@ -2,12 +2,19 @@
 // EventCard — marketplace card for browse rows + grid
 // Supports priceInfo.type: 'free' | 'paid' | 'mixed'
 // ============================================================
-function EventCard({e, onOpen, onShare, wide=false}) {
+import React from 'react';
+import { IMG, IMG_FALLBACK, priceInfoFor } from './data.jsx';
+import { Ico, MetaPill } from './Primitives.jsx';
+
+export function EventCard({e, onOpen, onShare, wide=false}) {
   const pi = priceInfoFor(e);
 
   const isFree   = pi.type === 'free';
   const isMixed  = pi.type === 'mixed';
   const expired  = e.status === 'expired';
+
+  const [imgFailed, setImgFailed] = React.useState(false);
+  const hasImg = !!e.img && !imgFailed;
 
   // Image badge: only for fully-free or expired
   const badge = expired
@@ -29,14 +36,23 @@ function EventCard({e, onOpen, onShare, wide=false}) {
       onMouseEnter={ev => ev.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,.11)'}
       onMouseLeave={ev => ev.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.06)'}
     >
-      {/* ── Image ── */}
+      {/* ── Image (real photo, or Jungle logo fallback) ── */}
       <div style={{
         position: 'relative',
         aspectRatio: '3/2',
-        backgroundImage: `url(${IMG(e.img)})`,
-        backgroundSize: 'cover', backgroundPosition: 'center',
+        background: hasImg ? '#F5F5F0' : '#E5F5ED',
         filter: expired ? 'grayscale(0.85)' : 'none'
       }}>
+        <img
+          src={hasImg ? IMG(e.img) : IMG_FALLBACK}
+          alt={e.title}
+          onError={() => setImgFailed(true)}
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%',
+            objectFit: hasImg ? 'cover' : 'contain',
+            objectPosition: 'center', padding: hasImg ? 0 : '14% 22%'
+          }}
+        />
         {/* Bottom gradient for depth */}
         <div style={{
           position: 'absolute', inset: 0,
@@ -181,4 +197,3 @@ const ecIconBtn = {
   cursor: 'pointer', boxShadow: '0 1px 5px rgba(0,0,0,.14)', padding: 0
 };
 
-window.EventCard = EventCard;

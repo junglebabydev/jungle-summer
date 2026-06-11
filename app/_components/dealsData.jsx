@@ -7,9 +7,9 @@
 // ============================================================
 
 // "today" for the prototype, so "ending soon" math is stable.
-const TODAY = new Date('2026-06-06T00:00:00+08:00');
+export const TODAY = new Date('2026-06-06T00:00:00+08:00');
 
-const DEAL_CATEGORIES = [
+export const DEAL_CATEGORIES = [
   { k: 'Classes', label: 'Classes' },
   { k: 'Camps', label: 'Camps' },
   { k: 'Attractions', label: 'Attractions' },
@@ -19,14 +19,14 @@ const DEAL_CATEGORIES = [
 ];
 
 // submitter types -> trust signal
-const SUBMITTER = {
+export const SUBMITTER = {
   merchant: { label: 'Verified merchant', tone: 'green' },
   jungle:   { label: 'Jungle team', tone: 'dark' },
   parent:   { label: 'Submitted by parent', tone: 'neutral' },
 };
 
 // Each deal maps to a future `deals` table row.
-const DEALS = [
+export const DEALS = [
   {
     id:'kidstop-summer20', merchant:'KidSTOP Science Centre', category:'Attractions',
     headline:'20% off admission for kids under 8', discountLabel:'20% off',
@@ -126,23 +126,23 @@ const DEALS = [
 ];
 
 // ---- helpers ----
-function daysLeft(expiryStr) {
+export function daysLeft(expiryStr) {
   const exp = new Date(expiryStr + 'T23:59:59+08:00');
   return Math.ceil((exp - TODAY) / 86400000);
 }
-function expiryText(expiryStr) {
+export function expiryText(expiryStr) {
   const d = new Date(expiryStr + 'T00:00:00+08:00');
   const day = d.getDate();
   const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
   return `${day} ${mon}`;
 }
-function urgencyTone(n) {
+export function urgencyTone(n) {
   if (n <= 3) return { label: n <= 0 ? 'Expired' : (n === 1 ? 'Ends today' : `${n} days left`), bg:'#FDECEA', fg:'#C5372F', dot:'#F63F3C' };
   if (n <= 7) return { label: `${n} days left`, bg:'#FCF3DF', fg:'#8A6A12', dot:'#EEC71B' };
   return { label: `${n} days left`, bg:'#E5F5ED', fg:'#0C3C26', dot:'#009B4D' };
 }
-function netScore(d) { return (d.up || 0) - (d.down || 0); }
-function submittedAgo(str) {
+export function netScore(d) { return (d.up || 0) - (d.down || 0); }
+export function submittedAgo(str) {
   const d = new Date(str + 'T00:00:00+08:00');
   const days = Math.round((TODAY - d) / 86400000);
   if (days <= 0) return 'today';
@@ -152,4 +152,3 @@ function submittedAgo(str) {
   return wk === 1 ? 'a week ago' : `${wk} weeks ago`;
 }
 
-Object.assign(window, { DEALS, DEAL_CATEGORIES, SUBMITTER, TODAY, daysLeft, expiryText, urgencyTone, netScore, submittedAgo });
