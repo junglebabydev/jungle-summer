@@ -2,7 +2,7 @@
 // MapPanel — stylized Singapore map with event pins (placeholder)
 // ============================================================
 import React from 'react';
-import { EVENTS, ROWS, FILTERS, IMG, priceText } from './data.jsx';
+import { EVENTS, ROWS, FILTERS, IMG, priceText, dedupeLanes } from './data.jsx';
 import { Ico, Button } from './Primitives.jsx';
 import { EventCard } from './EventCard.jsx';
 
@@ -141,14 +141,7 @@ export function Browse({go, tweaks, onShare, initialFilters}) {
 
   // Deduped lanes: an event shows only in the first row it matches, so the same
   // card never repeats across swim lanes. Render order = claim priority.
-  const rowLanes = React.useMemo(()=>{
-    const seen = new Set();
-    return ROWS.map(r=>{
-      const events = EVENTS.filter(e=> r.filter(e) && !seen.has(e.id));
-      events.forEach(e=> seen.add(e.id));
-      return { ...r, events };
-    });
-  }, []);
+  const rowLanes = React.useMemo(()=> dedupeLanes(ROWS), []);
 
   const cardProps = (e)=>({
     onOpen:()=>go('detail', e),

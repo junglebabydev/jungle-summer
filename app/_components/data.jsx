@@ -3599,6 +3599,19 @@ export const ROWS = [
   { key:'outdoor',  title:'Outdoor and active',     filter:(e)=> e.status!=='expired' && e.type==='Outdoor' },
 ];
 
+// Claim each event for the first lane it matches (render order = claim priority),
+// so the same card never repeats across the given swim lanes. Returns the rows
+// with a deduped `events` array each. Used by homepage/browse swim lanes only —
+// "view all" / filtered category grids deliberately keep their full (overlapping) lists.
+export function dedupeLanes(rows){
+  const seen = new Set();
+  return rows.map(r=>{
+    const events = EVENTS.filter(e=> r.filter(e) && !seen.has(e.id));
+    events.forEach(e=> seen.add(e.id));
+    return { ...r, events };
+  });
+}
+
 // Derive compact "S$X" / "$X" amount from freeform pricing text.
 function _firstAmount(text){
   if(!text) return null;

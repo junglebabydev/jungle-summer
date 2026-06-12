@@ -7,7 +7,7 @@
 // ============================================================
 
 import React from 'react';
-import { EVENTS, ROWS, IMG, priceText } from './data.jsx';
+import { EVENTS, ROWS, IMG, priceText, dedupeLanes } from './data.jsx';
 import { Ico, Button, MetaPill, Nav, Footer } from './Primitives.jsx';
 import { EventCard } from './EventCard.jsx';
 
@@ -198,9 +198,11 @@ function LandingEditorial({go, theme, cardProps}) {
       </section>
 
       <div style={{maxWidth:1256, margin:'0 auto', padding:'40px clamp(20px,4vw,48px) 72px'}}>
-        <LandingRail title="Happening this week" sub="Fresh things to do, updated daily" events={EVENTS.filter(ROWS[0].filter)} cardProps={cardProps}/>
-        <LandingRail title="Free things to do" sub="Great days out that cost nothing" events={EVENTS.filter(ROWS[1].filter)} cardProps={cardProps}/>
-        <LandingRail title="Festivals on now" sub="Children's Season, Winnie the Pooh and more" events={EVENTS.filter(ROWS[2].filter)} cardProps={cardProps}/>
+        {(()=>{ const lanes = dedupeLanes([ROWS[0], ROWS[1], ROWS[2]]); return <>
+          <LandingRail title="Happening this week" sub="Fresh things to do, updated daily" events={lanes[0].events} cardProps={cardProps}/>
+          <LandingRail title="Free things to do" sub="Great days out that cost nothing" events={lanes[1].events} cardProps={cardProps}/>
+          <LandingRail title="Festivals on now" sub="Children's Season, Winnie the Pooh and more" events={lanes[2].events} cardProps={cardProps}/>
+        </>; })()}
       </div>
       <Footer/>
     </div>
@@ -246,8 +248,10 @@ function LandingSpotlight({go, theme, cardProps}) {
       </section>
 
       <div style={{maxWidth:1256, margin:'0 auto', padding:'40px clamp(20px,4vw,48px) 72px'}}>
-        <LandingRail title="Free things to do" sub="Great days out that cost nothing" events={EVENTS.filter(ROWS[1].filter)} cardProps={cardProps}/>
-        <LandingRail title="Outdoor and active" sub="Parks, beaches and playgrounds" events={EVENTS.filter(ROWS[5].filter)} cardProps={cardProps}/>
+        {(()=>{ const lanes = dedupeLanes([ROWS[1], ROWS[5]]); return <>
+          <LandingRail title="Free things to do" sub="Great days out that cost nothing" events={lanes[0].events} cardProps={cardProps}/>
+          <LandingRail title="Outdoor and active" sub="Parks, beaches and playgrounds" events={lanes[1].events} cardProps={cardProps}/>
+        </>; })()}
       </div>
       <Footer/>
     </div>
