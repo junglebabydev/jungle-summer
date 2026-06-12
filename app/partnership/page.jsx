@@ -58,6 +58,7 @@ export default function PartnershipPage() {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isSuccess, setIsSuccess] = React.useState(false);
   const [errors, setErrors] = React.useState({});
+  const [isMobile, setIsMobile] = React.useState(false);
   const [formData, setFormData] = React.useState({
     businessName: "",
     contactPerson: "",
@@ -66,6 +67,13 @@ export default function PartnershipPage() {
     website: "",
     activity: "",
   });
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -120,29 +128,29 @@ export default function PartnershipPage() {
     setIsLoading(true);
 
     try {
-      const requestBody = {
-        businessName: formData.businessName,
-        contactPerson: formData.contactPerson,
-        phoneNumber: formData.phone,
-        email: formData.email,
-        website: formData.website,
-        activityDescription: formData.activity,
-      };
+      const response = await fetch("/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          to: ["support@jungle.baby", "devs@jungle.baby"],
+          subject: `Partnership Request: ${formData.businessName}`,
+          html: `
+            <h2>New Partnership Request</h2>
+            <p><strong>Business Name:</strong> ${formData.businessName}</p>
+            <p><strong>Contact Person:</strong> ${formData.contactPerson}</p>
+            <p><strong>Phone Number:</strong> ${formData.phone}</p>
+            <p><strong>Email:</strong> ${formData.email}</p>
+            <p><strong>Website/Instagram:</strong> ${formData.website || 'Not provided'}</p>
+            <p><strong>Activity Description:</strong></p>
+            <p>${formData.activity.replace(/\n/g, '<br>')}</p>
+          `,
+          text: `New Partnership Request\n\nBusiness Name: ${formData.businessName}\nContact Person: ${formData.contactPerson}\nPhone Number: ${formData.phone}\nEmail: ${formData.email}\nWebsite/Instagram: ${formData.website || 'Not provided'}\n\nActivity Description:\n${formData.activity}`,
+        }),
+      });
 
-      const response = await fetch(
-        "https://junglebabynode--junglesg-production.asia-east1.hosted.app/send-partnership-request",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data.success === true) {
+      if (response.ok) {
         setIsSuccess(true);
 
         setTimeout(() => {
@@ -157,7 +165,7 @@ export default function PartnershipPage() {
           });
         }, 5000);
       } else {
-        console.error("Partnership request failed:", data);
+        console.error("Partnership request failed");
       }
     } catch (error) {
       console.error("Error submitting partnership request:", error);
@@ -169,7 +177,7 @@ export default function PartnershipPage() {
   const displayContent = () => {
     if (activeTab === "Communities We Love") {
       return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 24 }}>
           {communities.map((community, index) => (
             <div
               key={index}
@@ -238,7 +246,7 @@ export default function PartnershipPage() {
             you're not already following them, now's the time.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(2, 1fr)', gap: 24 }}>
             {influencers.map((influencer, index) => (
               <div
                 key={index}
@@ -299,28 +307,29 @@ export default function PartnershipPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'Manrope, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'Manrope, sans-serif', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
       <NavWrapper />
       {/* Hero Section */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          overflow: 'hidden',
           backgroundImage: "url('/partnershipImg.jpg')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          height: 450,
+          minHeight: isMobile ? 280 : 450,
+          display: 'flex',
+          alignItems: 'center',
         }}
       >
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0, 0, 0, 0.25)' }} />
 
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: 1256, margin: '0 auto', padding: '0 16px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ maxWidth: 576 }}>
-            <h1 style={{ fontFamily: '"Feather Bold", serif', fontSize: 'clamp(36px, 5vw, 48px)', fontWeight: 'bold', marginBottom: 12, color: '#fff' }}>
-              Want to partner<br />with Jungle?
+        <div style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 1256, margin: '0 auto', padding: isMobile ? '40px 20px' : '60px 16px' }}>
+          <div style={{ maxWidth: isMobile ? '100%' : 576 }}>
+            <h1 style={{ fontFamily: '"Feather Bold", serif', fontSize: isMobile ? '28px' : 'clamp(36px, 5vw, 48px)', fontWeight: 'bold', marginBottom: 12, color: '#fff', lineHeight: 1.2 }}>
+              Want to partner{!isMobile && <br />}with Jungle?
             </h1>
-            <p style={{ color: '#fff', fontSize: 18 }}>
+            <p style={{ color: '#fff', fontSize: isMobile ? 14 : 18, lineHeight: 1.5 }}>
               If you run a parenting community, offer support for families, or
               create helpful, fun content for mums and dads in Singapore — we'd
               love to hear from you.
@@ -332,16 +341,16 @@ export default function PartnershipPage() {
                   .scrollIntoView({ behavior: "smooth" })
               }
               style={{
-                marginTop: 24,
+                marginTop: 20,
                 display: 'inline-flex',
                 alignItems: 'center',
-                padding: '10px 28px',
+                padding: isMobile ? '8px 20px' : '10px 28px',
                 background: '#fff',
                 color: '#047857',
                 fontWeight: 500,
                 borderRadius: 9999,
                 transition: 'opacity 300ms',
-                fontSize: 14,
+                fontSize: isMobile ? 13 : 14,
                 cursor: 'pointer',
                 border: 'none',
                 fontFamily: 'inherit'
@@ -356,12 +365,12 @@ export default function PartnershipPage() {
       </div>
 
       {/* Main Content */}
-      <div style={{ maxWidth: 1256, margin: '0 auto', padding: '48px 16px', flexGrow: 1 }}>
-        <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 600, color: '#0C3C26' }}>
+      <div style={{ maxWidth: 1256, margin: '0 auto', padding: isMobile ? '32px 20px' : '48px 16px', flexGrow: 1, width: '100%', boxSizing: 'border-box' }}>
+        <div style={{ marginBottom: isMobile ? 24 : 32 }}>
+          <h2 style={{ fontSize: isMobile ? 20 : 24, fontWeight: 600, color: '#0C3C26' }}>
             Communities and Influencers
           </h2>
-          <p style={{ color: '#4B5563' }}>
+          <p style={{ color: '#4B5563', fontSize: isMobile ? 14 : 16, marginTop: 8 }}>
             We work with local voices who inspire us, make us laugh, and share
             genuinely useful parenting tips.
           </p>
@@ -379,7 +388,8 @@ export default function PartnershipPage() {
                 border: '1px solid #D1D5DB',
                 borderRadius: 8,
                 fontSize: 15,
-                fontFamily: 'inherit'
+                fontFamily: 'inherit',
+                boxSizing: 'border-box'
               }}
             />
             <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)' }}>
@@ -462,7 +472,8 @@ export default function PartnershipPage() {
                     border: errors.businessName ? '1px solid #EF4444' : '1px solid #D1D5DB',
                     borderRadius: 8,
                     fontSize: 15,
-                    fontFamily: 'inherit'
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
                   }}
                 />
                 {errors.businessName && (
@@ -490,7 +501,8 @@ export default function PartnershipPage() {
                     border: errors.contactPerson ? '1px solid #EF4444' : '1px solid #D1D5DB',
                     borderRadius: 8,
                     fontSize: 15,
-                    fontFamily: 'inherit'
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
                   }}
                 />
                 {errors.contactPerson && (
@@ -518,7 +530,8 @@ export default function PartnershipPage() {
                     border: errors.phone ? '1px solid #EF4444' : '1px solid #D1D5DB',
                     borderRadius: 8,
                     fontSize: 15,
-                    fontFamily: 'inherit'
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
                   }}
                 />
                 <p style={{ marginTop: 4, fontSize: 14, color: '#6B7280' }}>
@@ -547,7 +560,8 @@ export default function PartnershipPage() {
                     border: errors.email ? '1px solid #EF4444' : '1px solid #D1D5DB',
                     borderRadius: 8,
                     fontSize: 15,
-                    fontFamily: 'inherit'
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
                   }}
                 />
                 {errors.email && (
@@ -573,7 +587,8 @@ export default function PartnershipPage() {
                     border: '1px solid #D1D5DB',
                     borderRadius: 8,
                     fontSize: 15,
-                    fontFamily: 'inherit'
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
                   }}
                 />
               </div>
@@ -596,7 +611,8 @@ export default function PartnershipPage() {
                     border: errors.activity ? '1px solid #EF4444' : '1px solid #D1D5DB',
                     borderRadius: 8,
                     fontSize: 15,
-                    fontFamily: 'inherit'
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
                   }}
                 />
                 {errors.activity && (
@@ -623,7 +639,8 @@ export default function PartnershipPage() {
                     transition: 'background 300ms',
                     border: 'none',
                     fontSize: 15,
-                    fontFamily: 'inherit'
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
                   }}
                   onMouseEnter={e => !isLoading && (e.currentTarget.style.background = '#059669')}
                   onMouseLeave={e => !isLoading && (e.currentTarget.style.background = '#10B981')}

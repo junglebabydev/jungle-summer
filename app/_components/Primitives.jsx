@@ -664,115 +664,120 @@ export function Nav({ go, theme }) {
         <div
           style={{
             maxWidth: 1320,
-            margin: '0 auto',
+            margin: "0 auto",
             padding: isMobile ? "0 20px" : "0 clamp(20px,4vw,40px)",
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
+            height: "100%",
+            display: "flex",
+            alignItems: "center",
             gap: isMobile ? 12 : 40,
           }}
         >
-        <div
-          onClick={() => go("landing")}
-          style={{
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            textDecoration: 'none',
-          }}
-        >
-          <div style={{
-            fontFamily: '"Feather Bold", serif',
-            fontSize: isMobile ? 20 : 24,
-            color: transparent ? (t.fg || '#FFF6E3') : '#0C3C26',
-            fontWeight: 'bold'
-          }}>
-            Jungle
+          <div
+            onClick={() => go("landing")}
+            style={{
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              textDecoration: "none",
+            }}
+          >
+            <img
+              src={transparent ? "/assets/brand/logo-white.png" : "/assets/brand/logo.png"}
+              style={{ height: isMobile ? 28 : 26 }}
+              alt="Jungle"
+            />
           </div>
-        </div>
 
-        {!isMobile ? (
-          <>
-            <nav
-              style={{
-                display: "flex",
-                gap: 40,
-                fontSize: 15,
-                fontWeight: 500,
-              }}
-            >
-              {[
-                ["Explore", "browse"],
-                ["Summer", "landing"],
-                ["Contact", "contact"],
-              ].map(([l, route]) => (
-                <a
-                  key={l}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (route) go(route);
-                  }}
-                  href="#"
+          {!isMobile ? (
+            <>
+              <nav
+                style={{
+                  display: "flex",
+                  gap: 40,
+                  fontSize: 15,
+                  fontWeight: 500,
+                }}
+              >
+                {[
+                  ["Explore", "browse"],
+                  ["Summer", "landing"],
+                  ["Contact", "contact"],
+                ].map(([l, route]) => (
+                  <a
+                    key={l}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (route === 'contact') {
+                        window.location.href = '/contact';
+                      } else if (route) {
+                        go(route);
+                      }
+                    }}
+                    href={route === 'contact' ? '/contact' : '#'}
+                    style={{
+                      color: transparent ? fg : "#374151",
+                      textDecoration: "none",
+                      transition: "color 200ms",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!transparent) e.currentTarget.style.color = "#0C3C26";
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!transparent) e.currentTarget.style.color = "#374151";
+                    }}
+                  >
+                    {l}
+                  </a>
+                ))}
+              </nav>
+              <div style={{ flex: 1 }} />
+            </>
+          ) : (
+            <>
+              <div style={{ flex: 1 }} />
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 8,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 4,
+                  alignItems: "flex-end",
+                }}
+              >
+                <span
                   style={{
-                    color: transparent ? fg : '#374151',
-                    textDecoration: "none",
-                    transition: 'color 200ms',
+                    width: 24,
+                    height: 2,
+                    background: fg,
+                    borderRadius: 1,
+                    transition: "all 200ms",
                   }}
-                  onMouseEnter={e => { if (!transparent) e.currentTarget.style.color = '#0C3C26' }}
-                  onMouseLeave={e => { if (!transparent) e.currentTarget.style.color = '#374151' }}
-                >
-                  {l}
-                </a>
-              ))}
-            </nav>
-            <div style={{ flex: 1 }} />
-          </>
-        ) : (
-          <>
-            <div style={{ flex: 1 }} />
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                padding: 8,
-                display: "flex",
-                flexDirection: "column",
-                gap: 4,
-                alignItems: "flex-end",
-              }}
-            >
-              <span
-                style={{
-                  width: 24,
-                  height: 2,
-                  background: fg,
-                  borderRadius: 1,
-                  transition: "all 200ms",
-                }}
-              />
-              <span
-                style={{
-                  width: menuOpen ? 24 : 18,
-                  height: 2,
-                  background: fg,
-                  borderRadius: 1,
-                  transition: "all 200ms",
-                }}
-              />
-              <span
-                style={{
-                  width: menuOpen ? 24 : 14,
-                  height: 2,
-                  background: fg,
-                  borderRadius: 1,
-                  transition: "all 200ms",
-                }}
-              />
-            </button>
-          </>
-        )}
+                />
+                <span
+                  style={{
+                    width: menuOpen ? 24 : 18,
+                    height: 2,
+                    background: fg,
+                    borderRadius: 1,
+                    transition: "all 200ms",
+                  }}
+                />
+                <span
+                  style={{
+                    width: menuOpen ? 24 : 14,
+                    height: 2,
+                    background: fg,
+                    borderRadius: 1,
+                    transition: "all 200ms",
+                  }}
+                />
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -794,18 +799,20 @@ export function Nav({ go, theme }) {
           {[
             ["Explore", "browse"],
             ["Summer", "landing"],
-            ["Deals", "deals"],
             ["Contact", "contact"],
-            ["List with us", "submit"],
           ].map(([l, route], index) => (
             <a
               key={l}
               onClick={(e) => {
                 e.preventDefault();
-                if (route) go(route);
+                if (route === 'contact') {
+                  window.location.href = '/contact';
+                } else if (route) {
+                  go(route);
+                }
                 setMenuOpen(false);
               }}
-              href="#"
+              href={route === 'contact' ? '/contact' : '#'}
               style={{
                 display: "block",
                 padding: "14px 24px",

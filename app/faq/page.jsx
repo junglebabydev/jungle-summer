@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { NavWrapper } from '../_components/NavWrapper';
-import { Footer } from '../_components/Primitives';
+import React from "react";
+import { NavWrapper } from "../_components/NavWrapper";
+import { Footer } from "../_components/Primitives";
 
 const faqs = [
   {
@@ -94,8 +94,9 @@ const faqs = [
 
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = React.useState(null);
-  
-  const whatsAppUrl = "https://wa.me/6589328429/?text=Hi%2C%20I%20need%20help%20booking%20activities%20for%20my%20child.";
+
+  const whatsAppUrl =
+    "https://wa.me/6589328429/?text=Hi%2C%20I%20need%20help%20booking%20activities%20for%20my%20child.";
 
   const toggleFAQ = (index) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -107,14 +108,42 @@ export default function FAQPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'Manrope, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#fff",
+        fontFamily: "Manrope, sans-serif",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <NavWrapper />
-      <div style={{ maxWidth: 1256, margin: '0 auto', padding: '84px 20px 32px', flexGrow: 1 }}>
-        <div style={{ borderBottom: '1px solid #E5E7EB', paddingBottom: 24, marginBottom: 48 }}>
-          <h1 style={{ fontFamily: '"Feather Bold", serif', fontSize: 'clamp(28px, 4vw, 36px)', color: '#000', marginBottom: 8 }}>
+      <div
+        style={{
+          maxWidth: 1256,
+          margin: "0 auto",
+          padding: "14px 20px 32px",
+          flexGrow: 1,
+        }}
+      >
+        <div
+          style={{
+            borderBottom: "1px solid #E5E7EB",
+            paddingBottom: 24,
+            marginBottom: 48,
+          }}
+        >
+          <h1
+            style={{
+              fontFamily: '"Feather Bold", serif',
+              fontSize: "clamp(28px, 4vw, 36px)",
+              color: "#000",
+              marginBottom: 8,
+            }}
+          >
             Frequently Asked Questions
           </h1>
-          <p style={{ color: '#666', marginTop: 8, fontSize: 16 }}>
+          <p style={{ color: "#666", marginTop: 8, fontSize: 16 }}>
             Find answers to common questions about our services
           </p>
         </div>
@@ -122,77 +151,120 @@ export default function FAQPage() {
         <div>
           {faqs.map((section, sectionIndex) => (
             <div key={sectionIndex} style={{ marginBottom: 64 }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 24 }}>
-                <h2 style={{ fontSize: 24, fontWeight: 600, color: '#000' }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginBottom: 24,
+                }}
+              >
+                <h2 style={{ fontSize: 24, fontWeight: 600, color: "#000" }}>
                   {section.category}
                 </h2>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 16 }}
+              >
                 {section.questions.map((faq, index) => (
                   <div
                     key={index}
-                    style={{ 
-                      borderRadius: 8, 
-                      border: '1px solid #F3F4F6', 
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                      overflow: 'hidden',
-                      transition: 'box-shadow 300ms',
+                    style={{
+                      borderRadius: 8,
+                      border: "1px solid #F3F4F6",
+                      boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                      overflow: "hidden",
+                      transition: "box-shadow 300ms",
                     }}
-                    onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'}
-                    onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 4px 6px rgba(0,0,0,0.1)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.boxShadow =
+                        "0 1px 3px rgba(0,0,0,0.1)")
+                    }
                   >
                     <button
                       onClick={() => toggleFAQ(`${sectionIndex}-${index}`)}
-                      style={{ 
-                        width: '100%', 
-                        textAlign: 'left',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                         padding: 20,
-                        cursor: 'pointer',
-                        background: '#fff',
-                        border: 'none',
-                        fontFamily: 'inherit'
+                        cursor: "pointer",
+                        background: "#fff",
+                        border: "none",
+                        fontFamily: "inherit",
                       }}
                     >
-                      <span style={{ fontWeight: 500, fontSize: 16, color: '#000' }}>{faq.question}</span>
+                      <span
+                        style={{ fontWeight: 500, fontSize: 16, color: "#000" }}
+                      >
+                        {faq.question}
+                      </span>
                       <div
                         style={{
                           width: 24,
                           height: 24,
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          transition: 'background-color 300ms',
-                          background: openIndex === `${sectionIndex}-${index}` ? '#0C3C26' : '#F3F4F6',
+                          borderRadius: "50%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          transition: "background-color 300ms",
+                          background:
+                            openIndex === `${sectionIndex}-${index}`
+                              ? "#0C3C26"
+                              : "#F3F4F6",
                         }}
                       >
-                        <span style={{ 
-                          color: openIndex === `${sectionIndex}-${index}` ? '#fff' : '#666',
-                          transform: openIndex === `${sectionIndex}-${index}` ? 'rotate(180deg)' : 'rotate(0deg)',
-                          transition: 'transform 300ms',
-                          display: 'inline-block'
-                        }}>
+                        <span
+                          style={{
+                            color:
+                              openIndex === `${sectionIndex}-${index}`
+                                ? "#fff"
+                                : "#666",
+                            transform:
+                              openIndex === `${sectionIndex}-${index}`
+                                ? "rotate(180deg)"
+                                : "rotate(0deg)",
+                            transition: "transform 300ms",
+                            display: "inline-block",
+                          }}
+                        >
                           ▼
                         </span>
                       </div>
                     </button>
                     <div
                       style={{
-                        maxHeight: openIndex === `${sectionIndex}-${index}` ? '300px' : '0',
-                        opacity: openIndex === `${sectionIndex}-${index}` ? 1 : 0,
-                        transition: 'all 300ms ease-in-out',
-                        overflow: 'hidden',
+                        maxHeight:
+                          openIndex === `${sectionIndex}-${index}`
+                            ? "300px"
+                            : "0",
+                        opacity:
+                          openIndex === `${sectionIndex}-${index}` ? 1 : 0,
+                        transition: "all 300ms ease-in-out",
+                        overflow: "hidden",
                       }}
                     >
-                      <div style={{ 
-                        padding: '0 20px 20px', 
-                        background: 'rgba(249, 250, 251, 0.5)',
-                        borderTop: '1px solid #F3F4F6'
-                      }}>
-                        <p style={{ color: '#666', marginTop: 12, lineHeight: 1.6 }}>{faq.answer}</p>
+                      <div
+                        style={{
+                          padding: "0 20px 20px",
+                          background: "rgba(249, 250, 251, 0.5)",
+                          borderTop: "1px solid #F3F4F6",
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: "#666",
+                            marginTop: 12,
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {faq.answer}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -200,61 +272,81 @@ export default function FAQPage() {
               </div>
             </div>
           ))}
-          
+
           {/* Help Section */}
-          <div style={{ 
-            marginTop: 64,
-            padding: 32,
-            background: 'rgba(12, 60, 38, 0.05)',
-            borderRadius: 12,
-            border: '1px solid rgba(12, 60, 38, 0.1)',
-            textAlign: 'center'
-          }}>
-            <div style={{
-              width: 64,
-              height: 64,
-              background: 'rgba(12, 60, 38, 0.1)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 16px',
-              fontSize: 28
-            }}>
+          <div
+            style={{
+              marginTop: 64,
+              padding: 32,
+              background: "rgba(12, 60, 38, 0.05)",
+              borderRadius: 12,
+              border: "1px solid rgba(12, 60, 38, 0.1)",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                background: "rgba(12, 60, 38, 0.1)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 16px",
+                fontSize: 28,
+              }}
+            >
               💬
             </div>
-            <h2 style={{ fontSize: 20, fontWeight: 600, color: '#000', marginBottom: 12 }}>
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 600,
+                color: "#000",
+                marginBottom: 12,
+              }}
+            >
               Still need help?
             </h2>
-            <p style={{ color: '#666', marginTop: 12, maxWidth: 448, margin: '12px auto 24px', lineHeight: 1.6 }}>
-              Contact our support team for personalized assistance with any questions you may have
+            <p
+              style={{
+                color: "#666",
+                marginTop: 12,
+                maxWidth: 448,
+                margin: "12px auto 24px",
+                lineHeight: 1.6,
+              }}
+            >
+              Contact our support team for personalized assistance with any
+              questions you may have
             </p>
             <button
               onClick={handleWhatsAppClick}
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                padding: '12px 32px',
-                background: '#009B4D',
-                color: '#fff',
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "12px 32px",
+                background: "#009B4D",
+                color: "#fff",
                 borderRadius: 9999,
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
                 fontWeight: 500,
                 minWidth: 200,
-                justifyContent: 'center',
-                cursor: 'pointer',
-                border: 'none',
+                justifyContent: "center",
+                cursor: "pointer",
+                border: "none",
                 fontSize: 15,
-                fontFamily: 'inherit',
-                transition: 'all 300ms'
+                fontFamily: "inherit",
+                transition: "all 300ms",
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = '#04722F';
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.15)';
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#04722F";
+                e.currentTarget.style.boxShadow = "0 8px 16px rgba(0,0,0,0.15)";
               }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = '#009B4D';
-                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#009B4D";
+                e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
               }}
             >
               <span style={{ marginRight: 8 }}>💬</span> Contact via WhatsApp
