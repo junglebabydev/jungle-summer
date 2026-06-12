@@ -139,6 +139,17 @@ export function Browse({go, tweaks, onShare, initialFilters}) {
   // view mode: rows only in browse-mode (no filters) AND tweak says rows AND map hidden
   const useRows = !anyFilter && tweaks.browseDefault==='rows' && !showMap;
 
+  // Deduped lanes: an event shows only in the first row it matches, so the same
+  // card never repeats across swim lanes. Render order = claim priority.
+  const rowLanes = React.useMemo(()=>{
+    const seen = new Set();
+    return ROWS.map(r=>{
+      const events = EVENTS.filter(e=> r.filter(e) && !seen.has(e.id));
+      events.forEach(e=> seen.add(e.id));
+      return { ...r, events };
+    });
+  }, []);
+
   const cardProps = (e)=>({
     onOpen:()=>go('detail', e),
     onShare:()=>onShare(e),
@@ -194,7 +205,7 @@ export function Browse({go, tweaks, onShare, initialFilters}) {
           </div>
         ) : useRows ? (
           <div>
-            {ROWS.map(r=>(<Row key={r.key} title={r.title} events={EVENTS.filter(r.filter)} cardProps={cardProps}/>))}
+            {rowLanes.map(r=>(<Row key={r.key} title={r.title} events={r.events} cardProps={cardProps}/>))}
           </div>
         ) : (
           <div>
