@@ -6,7 +6,10 @@
 // Hero colour is tweakable: green | coral | yellow
 // ============================================================
 
+'use client';
+
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { EVENTS, ROWS, IMG, priceText, dedupeLanes } from './data.jsx';
 import { Ico, Button, MetaPill, Nav, Footer } from './Primitives.jsx';
 import { EventCard } from './EventCard.jsx';
@@ -61,14 +64,27 @@ function StickerWordmark({theme, size='lg', align='center'}) {
 
 function FloatStickers() {
   const items = [
-    { img:'p1', top:'16%', left:'7%', size:128, rot:-8 },
-    { img:'p5', top:'58%', left:'5%', size:108, rot:7 },
-    { img:'p2', top:'15%', right:'7%', size:118, rot:9 },
-    { img:'p4', top:'60%', right:'6%', size:120, rot:-6 },
+    { img:'p1', top:'16%', left:'7%', size:128, rot:-8, delay:0 },
+    { img:'p5', top:'58%', left:'5%', size:108, rot:7, delay:0.2 },
+    { img:'p2', top:'15%', right:'7%', size:118, rot:9, delay:0.4 },
+    { img:'p4', top:'60%', right:'6%', size:120, rot:-6, delay:0.6 },
   ];
   return (<div className="float-stickers" style={{position:'absolute', inset:0, pointerEvents:'none', zIndex:1}}>
     {items.map((it,i)=>(
-      <div key={i} style={{position:'absolute', top:it.top, left:it.left, right:it.right, width:it.size, height:it.size, transform:`rotate(${it.rot}deg)`, borderRadius:22, backgroundImage:`url(${IMG(it.img)})`, backgroundSize:'cover', backgroundPosition:'center', border:'5px solid #fff', boxShadow:'0 14px 30px rgba(0,0,0,.22)'}}/>
+      <motion.div 
+        key={i} 
+        initial={{ y: 0, rotate: it.rot }}
+        animate={{ 
+          y: [0, -15, 0],
+          rotate: [it.rot, it.rot + 3, it.rot - 3, it.rot]
+        }}
+        transition={{ 
+          duration: 4 + i * 0.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: it.delay
+        }}
+        style={{position:'absolute', top:it.top, left:it.left, right:it.right, width:it.size, height:it.size, borderRadius:22, backgroundImage:`url(${IMG(it.img)})`, backgroundSize:'cover', backgroundPosition:'center', border:'5px solid #fff', boxShadow:'0 14px 30px rgba(0,0,0,.22)'}}/>
     ))}
   </div>);
 }
@@ -151,9 +167,15 @@ function HeroCTAs({go, justify='center'}) {
 // ============================================================
 // LAYOUT 1 — Focused (original)
 // ============================================================
-function LandingFocused({go, theme, showStickers}) {
+function LandingFocused({go, theme, showStickers, bgKey, onCardHover}) {
   return (
-    <div style={{minHeight:'100vh', background:theme.bg, display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'Manrope, sans-serif'}}>
+    <motion.div 
+      key={bgKey}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 1.2, ease: "easeInOut" }}
+      style={{minHeight:'100vh', background:theme.bg, display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'Manrope, sans-serif', zIndex: 1}}>
       <img src="/assets/brand/graphic-01.svg" alt="" style={{position:'absolute', width:680, opacity:.07, top:-160, right:-160, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
       <Nav go={go} theme={theme.nav}/>
       {showStickers && <FloatStickers/>}
@@ -162,27 +184,39 @@ function LandingFocused({go, theme, showStickers}) {
           {Ico.cal(15)} June school holidays · 2 to 30 June
         </div>
         <div style={{marginBottom:34}}><StickerWordmark theme={theme}/></div>
-        <div style={{background:'#fff', borderRadius:26, boxShadow:'0 26px 70px rgba(0,0,0,.24)', padding:'clamp(28px,4vw,44px)', maxWidth:560, width:'100%', textAlign:'center', border:'1px solid rgba(0,0,0,.04)'}}>
+        <motion.div 
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          onMouseEnter={() => onCardHover && onCardHover(true)}
+          onMouseLeave={() => onCardHover && onCardHover(false)}
+          style={{background:'#fff', borderRadius:26, boxShadow:'0 26px 70px rgba(0,0,0,.24)', padding:'clamp(28px,4vw,44px)', maxWidth:560, width:'100%', textAlign:'center', border:'1px solid rgba(0,0,0,.04)'}}>
           <h1 style={{fontFamily:'"Feather Bold", serif', fontSize:'clamp(30px,4.4vw,42px)', color:'#0C3C26', margin:'0 0 14px', lineHeight:1.06}}>Find something fun to do this June</h1>
           <p style={{fontSize:16.5, color:'#666', lineHeight:1.55, margin:'0 auto 26px', maxWidth:440}}>Singapore has dozens of free and low-cost things happening this school holiday. Tell us a bit about your family and we'll show you what's on.</p>
           <HeroCTAs go={go}/>
           <div style={{fontSize:13, color:'#858585', marginTop:20, display:'flex', alignItems:'center', justifyContent:'center', gap:7}}>
             <span style={{color:'#009B4D'}}>{Ico.check(15)}</span> Free to browse. No sign-up needed.
           </div>
-        </div>
+        </motion.div>
         <div style={{marginTop:26, maxWidth:620, display:'flex', justifyContent:'center'}}><HeroChips theme={theme} go={go}/></div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 // ============================================================
 // LAYOUT 2 — Editorial : compact hero + live event rails
 // ============================================================
-function LandingEditorial({go, theme, cardProps}) {
+function LandingEditorial({go, theme, cardProps, bgKey, onCardHover}) {
   return (
-    <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif'}}>
-      <section style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
+    <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif', position: 'relative', zIndex: 1}}>
+      <motion.section 
+        key={bgKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
+        style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
         <img src="/assets/brand/graphic-02.svg" alt="" style={{position:'absolute', width:520, opacity:.08, top:-120, right:-120, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
         <Nav go={go} theme={theme.nav}/>
         <div style={{maxWidth:1256, margin:'0 auto', padding:'44px clamp(20px,4vw,48px) 64px', position:'relative', zIndex:2, textAlign:'center'}}>
@@ -195,7 +229,7 @@ function LandingEditorial({go, theme, cardProps}) {
           <div style={{display:'flex', justifyContent:'center'}}><HeroChips theme={theme} go={go}/></div>
         </div>
         <div style={{height:48, background:'linear-gradient(180deg, transparent, #F5F5F0)'}}/>
-      </section>
+      </motion.section>
 
       <div style={{maxWidth:1256, margin:'0 auto', padding:'40px clamp(20px,4vw,48px) 72px'}}>
         {(()=>{ const lanes = dedupeLanes([ROWS[0], ROWS[1], ROWS[2]]); return <>
@@ -212,12 +246,18 @@ function LandingEditorial({go, theme, cardProps}) {
 // ============================================================
 // LAYOUT 3 — Spotlight : split hero w/ live "This week's picks"
 // ============================================================
-function LandingSpotlight({go, theme, cardProps}) {
+function LandingSpotlight({go, theme, cardProps, bgKey, onCardHover}) {
   const picks = EVENTS.filter(e=>e.status!=='expired' && (e.when.includes('today')||e.when.includes('week'))).slice(0,4);
   const yellow = theme.key==='yellow';
   return (
-    <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif'}}>
-      <section style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
+    <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif', position: 'relative', zIndex: 1}}>
+      <motion.section 
+        key={bgKey}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
+        style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
         <img src="/assets/brand/graphic-03.svg" alt="" style={{position:'absolute', width:560, opacity:.07, bottom:-180, left:-140, color: yellow?'#0C3C26':'#fff', pointerEvents:'none'}}/>
         <Nav go={go} theme={theme.nav}/>
         <div style={{maxWidth:1256, margin:'0 auto', padding:'clamp(36px,5vw,64px) clamp(20px,4vw,48px) clamp(48px,6vw,72px)', position:'relative', zIndex:2, display:'grid', gridTemplateColumns:'minmax(0,1fr) minmax(0,460px)', gap:'clamp(28px,4vw,56px)', alignItems:'center'}}>
@@ -232,7 +272,10 @@ function LandingSpotlight({go, theme, cardProps}) {
             <div style={{marginTop:24}}><HeroChips theme={theme} go={go}/></div>
           </div>
           {/* right — live picks panel */}
-          <div style={{background:'#fff', borderRadius:22, boxShadow:'0 26px 70px rgba(0,0,0,.26)', padding:'18px 16px 14px', border:'1px solid rgba(0,0,0,.04)'}}>
+          <div 
+            onMouseEnter={() => onCardHover && onCardHover(true)}
+            onMouseLeave={() => onCardHover && onCardHover(false)}
+            style={{background:'#fff', borderRadius:22, boxShadow:'0 26px 70px rgba(0,0,0,.26)', padding:'18px 16px 14px', border:'1px solid rgba(0,0,0,.04)'}}>
             <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'4px 10px 12px'}}>
               <div style={{fontFamily:'"Feather Bold",serif', fontSize:18, color:'#0C3C26'}}>This week's picks</div>
               <span style={{fontSize:12.5, color:'#009B4D', fontWeight:700, display:'inline-flex', alignItems:'center', gap:5, background:'#E5F5ED', padding:'5px 10px', borderRadius:9999}}>{Ico.sun(13)} {picks.length} on now</span>
@@ -245,7 +288,7 @@ function LandingSpotlight({go, theme, cardProps}) {
           </div>
         </div>
         <div style={{height:48, background:'linear-gradient(180deg, transparent, #F5F5F0)'}}/>
-      </section>
+      </motion.section>
 
       <div style={{maxWidth:1256, margin:'0 auto', padding:'40px clamp(20px,4vw,48px) 72px'}}>
         {(()=>{ const lanes = dedupeLanes([ROWS[1], ROWS[5]], 4, picks.map(p=>p.id)); return <>
@@ -262,14 +305,31 @@ function LandingSpotlight({go, theme, cardProps}) {
 // Router
 // ============================================================
 export function Landing({go, themeKey, showStickers=true, homeLayout='focused', onShare}) {
-  const theme = HERO_THEMES[themeKey] || HERO_THEMES.green;
+  const colors = ['yellow', 'green', 'coral'];
+  const [colorIndex, setColorIndex] = React.useState(colors.indexOf(themeKey) !== -1 ? colors.indexOf(themeKey) : 0);
+  const [isPaused, setIsPaused] = React.useState(false);
+  const currentThemeKey = colors[colorIndex];
+  const theme = HERO_THEMES[currentThemeKey] || HERO_THEMES.green;
   const cardProps = (e)=>({ onOpen:()=>go('detail', e), onShare:()=>onShare(e) });
+  
+  React.useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setColorIndex((prev) => (prev + 1) % colors.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [isPaused]);
+  
   return (
-    <div data-screen-label="01 Landing">
-      {homeLayout==='editorial' ? <LandingEditorial go={go} theme={theme} cardProps={cardProps}/>
-        : homeLayout==='spotlight' ? <LandingSpotlight go={go} theme={theme} cardProps={cardProps}/>
-        : <LandingFocused go={go} theme={theme} showStickers={showStickers}/>}
+    <div data-screen-label="01 Landing" style={{position: 'relative', minHeight: '100vh'}}>
+      {/* Background layer that matches current theme to prevent flash */}
+      <div style={{position: 'absolute', inset: 0, background: theme.bg, zIndex: 0}} />
+      
+      <AnimatePresence initial={false}>
+        {homeLayout==='editorial' ? <LandingEditorial key={currentThemeKey} go={go} theme={theme} cardProps={cardProps} bgKey={currentThemeKey} onCardHover={setIsPaused}/>
+          : homeLayout==='spotlight' ? <LandingSpotlight key={currentThemeKey} go={go} theme={theme} cardProps={cardProps} bgKey={currentThemeKey} onCardHover={setIsPaused}/>
+          : <LandingFocused key={currentThemeKey} go={go} theme={theme} showStickers={showStickers} bgKey={currentThemeKey} onCardHover={setIsPaused}/>}
+      </AnimatePresence>
     </div>
   );
 }
-
