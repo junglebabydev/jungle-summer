@@ -3599,15 +3599,22 @@ export const ROWS = [
   { key:'outdoor',  title:'Outdoor and active',     filter:(e)=> e.status!=='expired' && e.type==='Outdoor' },
 ];
 
-// Claim each event for the first lane it matches (render order = claim priority),
-// so the same card never repeats across the given swim lanes. Returns the rows
-// with a deduped `events` array each. Used by homepage/browse swim lanes only —
-// "view all" / filtered category grids deliberately keep their full (overlapping) lists.
-export function dedupeLanes(rows){
-  const seen = new Set();
+// Keep every lane's FULL list, but reorder so the cards visible before the user
+// scrolls a row (the leading `lead` items) are unique across lanes. Shared items
+// are pushed to the tail of later lanes, so they only reappear on horizontal
+// scroll — never repeated in the same "first instance" of the page.
+// Render order = priority for the visible slots. `seed` pre-claims ids that are
+// already shown elsewhere above the lanes (e.g. a hero picks panel).
+// Used by homepage/browse swim lanes only — "view all" / filtered category grids
+// deliberately keep their full, overlapping lists.
+export function dedupeLanes(rows, lead = 4, seed = []){
+  const shownLead = new Set(seed);
   return rows.map(r=>{
-    const events = EVENTS.filter(e=> r.filter(e) && !seen.has(e.id));
-    events.forEach(e=> seen.add(e.id));
+    const all = EVENTS.filter(r.filter);
+    const fresh = [], repeat = [];
+    for(const e of all) (shownLead.has(e.id) ? repeat : fresh).push(e);
+    const events = [...fresh, ...repeat];
+    events.slice(0, lead).forEach(e=> shownLead.add(e.id));
     return { ...r, events };
   });
 }

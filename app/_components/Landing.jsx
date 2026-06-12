@@ -248,7 +248,7 @@ function LandingSpotlight({go, theme, cardProps}) {
       </section>
 
       <div style={{maxWidth:1256, margin:'0 auto', padding:'40px clamp(20px,4vw,48px) 72px'}}>
-        {(()=>{ const lanes = dedupeLanes([ROWS[1], ROWS[5]]); return <>
+        {(()=>{ const lanes = dedupeLanes([ROWS[1], ROWS[5]], 4, picks.map(p=>p.id)); return <>
           <LandingRail title="Free things to do" sub="Great days out that cost nothing" events={lanes[0].events} cardProps={cardProps}/>
           <LandingRail title="Outdoor and active" sub="Parks, beaches and playgrounds" events={lanes[1].events} cardProps={cardProps}/>
         </>; })()}
