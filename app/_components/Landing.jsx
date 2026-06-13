@@ -65,9 +65,9 @@ function StickerWordmark({theme, size='lg', align='center'}) {
 function FloatStickers() {
   const items = [
     { img:'p1', top:'16%', left:'7%', size:128, rot:-8, delay:0 },
-    { img:'p5', top:'58%', left:'5%', size:108, rot:7, delay:0.2 },
-    { img:'p2', top:'15%', right:'7%', size:118, rot:9, delay:0.4 },
-    { img:'p4', top:'60%', right:'6%', size:120, rot:-6, delay:0.6 },
+    { img:'p5', top:'58%', left:'5%', size:108, rot:7, delay:0 },
+    { img:'p2', top:'15%', right:'7%', size:118, rot:9, delay:0 },
+    { img:'p4', top:'60%', right:'6%', size:120, rot:-6, delay:0 },
   ];
   return (<div className="float-stickers" style={{position:'absolute', inset:0, pointerEvents:'none', zIndex:1}}>
     {items.map((it,i)=>(
@@ -174,7 +174,7 @@ function LandingFocused({go, theme, showStickers, bgKey, onCardHover}) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 1.2, ease: "easeInOut" }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
       style={{minHeight:'100vh', background:theme.bg, display:'flex', flexDirection:'column', position:'relative', overflow:'hidden', fontFamily:'Manrope, sans-serif', zIndex: 1}}>
       <img src="/assets/brand/graphic-01.svg" alt="" style={{position:'absolute', width:680, opacity:.07, top:-160, right:-160, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
       <Nav go={go} theme={theme.nav}/>
@@ -187,7 +187,7 @@ function LandingFocused({go, theme, showStickers, bgKey, onCardHover}) {
         <motion.div 
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.6, delay: 0, ease: "easeOut" }}
           onMouseEnter={() => onCardHover && onCardHover(true)}
           onMouseLeave={() => onCardHover && onCardHover(false)}
           style={{background:'#fff', borderRadius:26, boxShadow:'0 26px 70px rgba(0,0,0,.24)', padding:'clamp(28px,4vw,44px)', maxWidth:560, width:'100%', textAlign:'center', border:'1px solid rgba(0,0,0,.04)'}}>
@@ -215,7 +215,7 @@ function LandingEditorial({go, theme, cardProps, bgKey, onCardHover}) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
         style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
         <img src="/assets/brand/graphic-02.svg" alt="" style={{position:'absolute', width:520, opacity:.08, top:-120, right:-120, color: theme.key==='yellow'?'#0C3C26':'#fff', pointerEvents:'none'}}/>
         <Nav go={go} theme={theme.nav}/>
@@ -256,7 +256,7 @@ function LandingSpotlight({go, theme, cardProps, bgKey, onCardHover}) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 1.2, ease: "easeInOut" }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
         style={{position:'relative', background:theme.bg, overflow:'hidden'}}>
         <img src="/assets/brand/graphic-03.svg" alt="" style={{position:'absolute', width:560, opacity:.07, bottom:-180, left:-140, color: yellow?'#0C3C26':'#fff', pointerEvents:'none'}}/>
         <Nav go={go} theme={theme.nav}/>
@@ -314,10 +314,20 @@ export function Landing({go, themeKey, showStickers=true, homeLayout='focused', 
   
   React.useEffect(() => {
     if (isPaused) return;
+    // Start first color rotation after 5 seconds
+    const timeout = setTimeout(() => {
+      setColorIndex((prev) => (prev + 1) % colors.length);
+    }, 5000);
+    
+    // Set up regular interval for subsequent rotations
     const interval = setInterval(() => {
       setColorIndex((prev) => (prev + 1) % colors.length);
     }, 10000);
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [isPaused]);
   
   return (
