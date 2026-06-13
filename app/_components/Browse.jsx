@@ -2,9 +2,32 @@
 // MapPanel — stylized Singapore map with event pins (placeholder)
 // ============================================================
 import React from "react";
-import { EVENTS, ROWS, FILTERS, IMG, priceText, dedupeLanes } from "./data.jsx";
+import { EVENTS as FALLBACK_EVENTS, ROWS, FILTERS, IMG, priceText, dedupeLanes } from "./data.jsx";
 import { Ico, Button } from "./Primitives.jsx";
 import { EventCard } from "./EventCard.jsx";
+import { MapIcon } from "lucide-react";
+import { supabase } from '@/lib/supabase';
+
+// Helper function to get simple price text for map display
+function getSimpleMapPrice(e) {
+  if (!e) return "Paid";
+  if (e.priceType === "free") return "Free";
+  
+  // Try to extract a simple price from the display text
+  if (e.price && typeof e.price === 'string') {
+    // Look for patterns like $10, $20-30, etc
+    const priceMatch = e.price.match(/\$\d+(-\$?\d+)?/);
+    if (priceMatch) return priceMatch[0];
+    // If it starts with a dollar sign, take the first word
+    if (e.price.startsWith('$')) {
+      return e.price.split(/[\s,]/)[0];
+    }
+    // Check for "Mixed" or other simple keywords
+    if (e.price.toLowerCase().includes('mixed')) return "Mixed";
+    if (e.price.toLowerCase().includes('paid')) return "Paid";
+  }
+  return "Paid"; // Fallback for complex prices
+}
 
 export function MapPanel({
   events,
@@ -13,6 +36,18 @@ export function MapPanel({
   onOpen,
   style = {},
 }) {
+  const [windowWidth, setWindowWidth] = React.useState(
+    typeof window !== "undefined" ? window.innerWidth : 768
+  );
+  
+  React.useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  
+  const isMobile = windowWidth < 768;
+  
   return (
     <div
       style={{
@@ -71,10 +106,55 @@ export function MapPanel({
           {t}
         </div>
       ))}
-      {/* pins */}
-      {events.map((e) => {
+      {/* pins - filter to only show valid Singapore coordinates */}
+      {events.filter(e => {
+        // Only show events with valid coordinates
+        if (e.lat && e.lng) {
+          // Check if coordinates are within Singapore bounds
+          return e.lat >= 1.15 && e.lat <= 1.48 && e.lng >= 103.55 && e.lng <= 104.1;
+        }
+        // Show events with legacy pin coordinates
+        return e.pin;
+      }).map((e) => {
         const hot = hoveredId === e.id;
         const free = e.priceType === "free";
+        
+        // Use lat/lng if available, otherwise fallback to pin coordinates
+        let pinPosition;
+        if (e.lat && e.lng) {
+          // Convert lat/lng to percentage positions for Singapore map
+          // More accurate Singapore bounds based on actual geography
+          // Singapore mainland: lat 1.22-1.47, lng 103.6-104.03
+          const minLat = 1.22;
+          const maxLat = 1.47;
+          const minLng = 103.62;
+          const maxLng = 104.02;
+          
+          // Calculate position with adjusted scaling for the stylized map
+          let xPercent = ((e.lng - minLng) / (maxLng - minLng)) * 80; // Scale to 80% width
+          let yPercent = (1 - (e.lat - minLat) / (maxLat - minLat)) * 70; // Scale to 70% height
+          
+          // Offset to center the pins on the landmass
+          xPercent += 15; // Shift right
+          yPercent += 20; // Shift down
+          
+          // Clamp values to keep pins within the green landmass area
+          pinPosition = { 
+            x: Math.max(20, Math.min(85, xPercent)), 
+            y: Math.max(25, Math.min(75, yPercent)) 
+          };
+          
+          // Debug log for troubleshooting
+          if (e.lat < minLat || e.lat > maxLat || e.lng < minLng || e.lng > maxLng) {
+            console.log(`Event outside Singapore bounds: ${e.title} at lat:${e.lat}, lng:${e.lng}`);
+          }
+        } else if (e.pin) {
+          // Use legacy pin coordinates if available
+          pinPosition = e.pin;
+        } else {
+          // Default fallback position (center of map)
+          pinPosition = { x: 50, y: 50 };
+        }
         return (
           <button
             key={e.id}
@@ -83,8 +163,8 @@ export function MapPanel({
             onClick={() => onOpen(e)}
             style={{
               position: "absolute",
-              left: `${e.pin.x}%`,
-              top: `${e.pin.y}%`,
+              left: `${pinPosition.x}%`,
+              top: `${pinPosition.y}%`,
               transform: `translate(-50%,-100%) scale(${hot ? 1.12 : 1})`,
               transformOrigin: "bottom center",
               zIndex: hot ? 20 : 5,
@@ -104,15 +184,18 @@ export function MapPanel({
                 color: hot ? "#fff" : free ? "#3a2e00" : "#0C3C26",
                 fontFamily: "Manrope,sans-serif",
                 fontWeight: 800,
-                fontSize: 12.5,
-                padding: "5px 10px",
+                fontSize: isMobile ? 11 : 12.5,
+                padding: isMobile ? "6px 12px" : "5px 10px",
                 borderRadius: 9999,
                 boxShadow: "0 4px 12px rgba(0,0,0,.22)",
                 whiteSpace: "nowrap",
                 border: "2px solid #fff",
+                minWidth: isMobile ? 44 : "auto",
+                minHeight: isMobile ? 32 : "auto",
+                justifyContent: "center",
               }}
             >
-              {priceText(e)}
+              {getSimpleMapPrice(e)}
             </div>
             <div
               style={{
@@ -132,18 +215,57 @@ export function MapPanel({
         (() => {
           const e = events.find((x) => x.id === hoveredId);
           if (!e) return null;
+          // Use lat/lng if available, otherwise fallback to pin coordinates
+          let pinPosition;
+          if (e.lat && e.lng) {
+            // Convert lat/lng to percentage positions for Singapore map
+            // Use same conversion as pins for consistency
+            const minLat = 1.22;
+            const maxLat = 1.47;
+            const minLng = 103.62;
+            const maxLng = 104.02;
+            
+            // Calculate position with adjusted scaling for the stylized map
+            let xPercent = ((e.lng - minLng) / (maxLng - minLng)) * 80; // Scale to 80% width
+            let yPercent = (1 - (e.lat - minLat) / (maxLat - minLat)) * 70; // Scale to 70% height
+            
+            // Offset to center the pins on the landmass
+            xPercent += 15; // Shift right
+            yPercent += 20; // Shift down
+            
+            // Clamp values to keep tooltips within the green landmass area
+            pinPosition = { 
+              x: Math.max(20, Math.min(85, xPercent)), 
+              y: Math.max(25, Math.min(75, yPercent)) 
+            };
+          } else if (e.pin) {
+            pinPosition = e.pin;
+          } else {
+            pinPosition = { x: 50, y: 50 };
+          }
+          // Calculate if tooltip would go off screen
+          const tooltipLeft = pinPosition.x > 70 ? "auto" : `${pinPosition.x}%`;
+          const tooltipRight = pinPosition.x > 70 ? `${100 - pinPosition.x}%` : "auto";
+          const tooltipTransform = pinPosition.x > 70 
+            ? "translateX(50%)" 
+            : pinPosition.x < 30 
+              ? "translateX(-20%)" 
+              : "translateX(-50%)";
+              
           return (
             <div
               style={{
                 position: "absolute",
-                left: `${e.pin.x}%`,
-                top: `${e.pin.y}%`,
-                transform: "translate(-50%, 14px)",
+                left: tooltipLeft,
+                right: tooltipRight,
+                top: `${pinPosition.y}%`,
+                transform: `${tooltipTransform} translateY(14px)`,
                 zIndex: 30,
                 background: "#fff",
                 borderRadius: 12,
                 boxShadow: "0 12px 28px rgba(0,0,0,.2)",
                 width: 200,
+                maxWidth: "90%",
                 overflow: "hidden",
                 pointerEvents: "none",
               }}
@@ -168,7 +290,7 @@ export function MapPanel({
                   {e.title}
                 </div>
                 <div style={{ fontSize: 11.5, color: "#666", marginTop: 2 }}>
-                  {e.area} · {priceText(e)}
+                  {e.area} · {getSimpleMapPrice(e)}
                 </div>
               </div>
             </div>
@@ -1223,9 +1345,86 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
   const [viewMode, setViewMode] = React.useState("rows"); // 'grid' | 'rows' | 'list' | 'swipe'
   const mapMode = tweaks.mapPlacement; // 'collapsed' | 'left'
   const [showMap, setShowMap] = React.useState(mapMode === "left");
+  const [windowWidth, setWindowWidth] = React.useState(typeof window !== "undefined" ? window.innerWidth : 768);
+  const [events, setEvents] = React.useState([]);
+  const [isLoadingEvents, setIsLoadingEvents] = React.useState(true);
+  
+  // Fetch events from Supabase
+  React.useEffect(() => {
+    const fetchEvents = async () => {
+      setIsLoadingEvents(true);
+      try {
+        const { data, error } = await supabase
+          .from('things_to_do')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching events:', error);
+          // Fallback to hardcoded data if API fails
+          setEvents(FALLBACK_EVENTS);
+        } else {
+          // Transform API data to match the expected format
+          const transformedEvents = (data || []).map(item => ({
+            id: item.slug || item.id,
+            title: item.title || '',
+            provider: item.provider_name || '',
+            img: item.hero_image_url || 'placeholder',
+            area: item.area || 'Central',
+            age: item.age_band ? (Array.isArray(item.age_band) ? item.age_band : [item.age_band]) : ['all'],
+            ageLabel: item.age_band ? (Array.isArray(item.age_band) ? item.age_band.join(', ') : item.age_band) : 'All ages',
+            priceType: item.price_type || 'paid',
+            price: item.price_display || '',
+            priceDisplay: item.price_display || 'Free',
+            priceInfo: {
+              type: item.price_type || 'paid',
+              display: item.price_display || '',
+              note: item.price_notes || null
+            },
+            when: item.recurrence || ['today'],
+            type: item.type || 'activity',
+            status: item.status || 'active',
+            lat: item.latitude,
+            lng: item.longitude,
+            venue: item.venue_name || '',
+            venueAddress: item.venue_address || '',
+            description: item.description || item.long_description || '',
+            longBlurb: item.long_description || item.description || '',
+            blurb: item.description || '',
+            dates: item.start_date ? `${item.start_date} - ${item.end_date || item.start_date}` : 'Ongoing',
+            times: item.times || '',
+            recurrence: item.recurrence || '',
+            bookingRequired: item.booking_required || false,
+            bookingUrl: item.booking_url || '',
+            tags: item.categories ? (Array.isArray(item.categories) ? item.categories : [item.categories]) : [],
+            media: [], // EventDetail expects a media array
+            pin: null, // Add pin as null since we use lat/lng
+          }));
+          setEvents(transformedEvents);
+        }
+      } catch (err) {
+        console.error('Failed to fetch events:', err);
+        setEvents(FALLBACK_EVENTS);
+      } finally {
+        setIsLoadingEvents(false);
+      }
+    };
+    
+    fetchEvents();
+  }, []);
+  
+  React.useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  
   React.useEffect(() => {
     setShowMap(mapMode === "left");
   }, [mapMode]);
+  
+  const isMobile = windowWidth < 768;
+  const isSmallMobile = windowWidth < 480;
 
   const setF = (k, v) => setFilters((f) => ({ ...f, [k]: v }));
   const anyFilter = Object.values(filters).some(Boolean);
@@ -1242,8 +1441,8 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
         ? e.priceType === "free"
         : e.priceType !== "free")) &&
     (!filters.type || e.type === filters.type);
-  const filtered = EVENTS.filter(match);
-  const expiredCount = EVENTS.filter((e) => e.status === "expired").length;
+  const filtered = events.filter(match);
+  const expiredCount = events.filter((e) => e.status === "expired").length;
 
   // Deduped lanes: an event shows only in the first row it matches, so the same
   // card never repeats across swim lanes. Render order = claim priority.
@@ -1254,6 +1453,43 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
     onShare: () => onShare(e),
   });
 
+  // Show loading state while fetching events
+  if (isLoadingEvents) {
+    return (
+      <div
+        data-screen-label="02 Browse Loading"
+        style={{
+          background: "#F5F5F0",
+          minHeight: "100vh",
+          fontFamily: "Manrope, sans-serif",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: "50px",
+              height: "50px",
+              margin: "0 auto 20px",
+              border: "4px solid #E5E5E0",
+              borderTopColor: "#009B4D",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <style jsx>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+          `}</style>
+          <div style={{ fontSize: "16px", color: "#666" }}>Loading events...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       data-screen-label="02 Browse"
@@ -1261,15 +1497,19 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
         background: "#F5F5F0",
         minHeight: "100vh",
         fontFamily: "Manrope, sans-serif",
+        width: "100%",
+        overflowX: "hidden",
       }}
     >
       {/* page head */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #EEE" }}>
+      <div style={{ background: "#fff", borderBottom: "1px solid #EEE", width: "100%" }}>
         <div
           style={{
             maxWidth: 1320,
             margin: "0 auto",
-            padding: "26px clamp(20px,4vw,40px) 0",
+            padding: isMobile ? "20px 16px 0" : "26px clamp(20px,4vw,40px) 0",
+            width: "100%",
+            boxSizing: "border-box",
           }}
         >
           <div style={{ fontSize: 13, color: "#666", marginBottom: 6 }}>
@@ -1308,15 +1548,17 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
           <div
             style={{
               position: "sticky",
-              top: 72,
+              top: isMobile ? 60 : 72,
               zIndex: 25,
               background: "#fff",
               display: "flex",
               alignItems: "center",
-              gap: 10,
+              gap: isMobile ? 6 : 10,
               flexWrap: "wrap",
-              padding: "12px 0",
+              padding: isMobile ? "10px 0" : "12px 0",
               borderTop: "1px solid #F4F4F0",
+              width: "100%",
+              boxSizing: "border-box",
             }}
           >
             <FilterDropdown
@@ -1378,6 +1620,32 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
               </button>
             )}
             <div style={{ flex: 1 }} />
+            {/* Map toggle button - only show on desktop */}
+            {mapMode === "collapsed" && !isMobile && (
+              <button
+                onClick={() => setShowMap(!showMap)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  height: 42,
+                  padding: "0 14px",
+                  borderRadius: 9999,
+                  border: `1px solid ${showMap ? "#009B4D" : "#DDD"}`,
+                  background: showMap ? "#E5F5ED" : "#fff",
+                  color: showMap ? "#0C3C26" : "#333",
+                  fontFamily: "inherit",
+                  fontSize: 14,
+                  fontWeight: showMap ? 700 : 600,
+                  cursor: "pointer",
+                  transition: "all 150ms",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <MapIcon size={18} strokeWidth={2} />
+                {showMap ? "Hide Map" : "Show Map"}
+              </button>
+            )}
             {/* View mode switcher */}
             <div
               style={{
@@ -1391,24 +1659,24 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
               <button
                 onClick={() => setViewMode("rows")}
                 style={{
-                  padding: "6px 10px",
+                  padding: isMobile ? "6px 8px" : "6px 10px",
                   borderRadius: 6,
                   border: "none",
                   background: viewMode === "rows" ? "#fff" : "transparent",
                   color: viewMode === "rows" ? "#0C3C26" : "#666",
                   fontFamily: "inherit",
-                  fontSize: 13,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 600,
                   cursor: "pointer",
                   transition: "all 150ms",
                   display: "flex",
                   alignItems: "center",
-                  gap: 5,
+                  gap: isMobile ? 3 : 5,
                 }}
               >
                 <svg
-                  width="16"
-                  height="16"
+                  width={isMobile ? "14" : "16"}
+                  height={isMobile ? "14" : "16"}
                   viewBox="0 0 16 16"
                   fill="currentColor"
                 >
@@ -1416,29 +1684,29 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
                   <rect x="1" y="7" width="14" height="2" rx="0.5" />
                   <rect x="1" y="11" width="14" height="2" rx="0.5" />
                 </svg>
-                Rows
+                {!isMobile && "Rows"}
               </button>
               <button
                 onClick={() => setViewMode("grid")}
                 style={{
-                  padding: "6px 10px",
+                  padding: isMobile ? "6px 8px" : "6px 10px",
                   borderRadius: 6,
                   border: "none",
                   background: viewMode === "grid" ? "#fff" : "transparent",
                   color: viewMode === "grid" ? "#0C3C26" : "#666",
                   fontFamily: "inherit",
-                  fontSize: 13,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 600,
                   cursor: "pointer",
                   transition: "all 150ms",
                   display: "flex",
                   alignItems: "center",
-                  gap: 5,
+                  gap: isMobile ? 3 : 5,
                 }}
               >
                 <svg
-                  width="16"
-                  height="16"
+                  width={isMobile ? "14" : "16"}
+                  height={isMobile ? "14" : "16"}
                   viewBox="0 0 16 16"
                   fill="currentColor"
                 >
@@ -1447,29 +1715,29 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
                   <rect x="1" y="9" width="6" height="6" rx="0.5" />
                   <rect x="9" y="9" width="6" height="6" rx="0.5" />
                 </svg>
-                Grid
+                {!isMobile && "Grid"}
               </button>
               <button
                 onClick={() => setViewMode("list")}
                 style={{
-                  padding: "6px 10px",
+                  padding: isMobile ? "6px 8px" : "6px 10px",
                   borderRadius: 6,
                   border: "none",
                   background: viewMode === "list" ? "#fff" : "transparent",
                   color: viewMode === "list" ? "#0C3C26" : "#666",
                   fontFamily: "inherit",
-                  fontSize: 13,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 600,
                   cursor: "pointer",
                   transition: "all 150ms",
                   display: "flex",
                   alignItems: "center",
-                  gap: 5,
+                  gap: isMobile ? 3 : 5,
                 }}
               >
                 <svg
-                  width="16"
-                  height="16"
+                  width={isMobile ? "14" : "16"}
+                  height={isMobile ? "14" : "16"}
                   viewBox="0 0 16 16"
                   fill="currentColor"
                 >
@@ -1480,29 +1748,29 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
                   <rect x="1" y="11" width="3" height="3" rx="0.5" />
                   <rect x="5" y="11.5" width="10" height="2" rx="0.5" />
                 </svg>
-                List
+                {!isMobile && "List"}
               </button>
               <button
                 onClick={() => setViewMode("swipe")}
                 style={{
-                  padding: "6px 10px",
+                  padding: isMobile ? "6px 8px" : "6px 10px",
                   borderRadius: 6,
                   border: "none",
                   background: viewMode === "swipe" ? "#fff" : "transparent",
                   color: viewMode === "swipe" ? "#0C3C26" : "#666",
                   fontFamily: "inherit",
-                  fontSize: 13,
+                  fontSize: isMobile ? 12 : 13,
                   fontWeight: 600,
                   cursor: "pointer",
                   transition: "all 150ms",
                   display: "flex",
                   alignItems: "center",
-                  gap: 5,
+                  gap: isMobile ? 3 : 5,
                 }}
               >
                 <svg
-                  width="16"
-                  height="16"
+                  width={isMobile ? "14" : "16"}
+                  height={isMobile ? "14" : "16"}
                   viewBox="0 0 16 16"
                   fill="currentColor"
                 >
@@ -1518,7 +1786,7 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
                   />
                   <rect x="5" y="4" width="6" height="1" rx="0.5" />
                 </svg>
-                Swipe
+                {!isMobile && "Swipe"}
               </button>
             </div>
             {expiredCount > 0 && (
@@ -1577,24 +1845,30 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
         style={{
           maxWidth: 1320,
           margin: "0 auto",
-          padding: "26px clamp(20px,4vw,40px) 80px",
+          padding: isMobile ? "20px 16px 40px" : "26px clamp(20px,4vw,40px) 80px",
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
-        {showMap ? (
+        {showMap && !isMobile ? (
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(0,1.05fr) minmax(0,1fr)",
-              gap: 24,
+              gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1.05fr) minmax(0,1fr)",
+              gap: isMobile ? 16 : 24,
               alignItems: "start",
             }}
           >
             <div
               style={{
-                position: "sticky",
-                top: 140,
-                height: "calc(100vh - 170px)",
-                minHeight: 460,
+                position: isMobile ? "relative" : "sticky",
+                top: isMobile ? 0 : 140,
+                height: isMobile ? "350px" : "calc(100vh - 170px)",
+                minHeight: isMobile ? "300px" : "460px",
+                width: "100%",
+                marginBottom: isMobile ? 16 : 0,
+                order: 0,
+                boxSizing: "border-box",
               }}
             >
               <MapPanel
@@ -1608,8 +1882,12 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(260px,1fr))",
-                gap: 18,
+                gridTemplateColumns: isMobile 
+                  ? "1fr" 
+                  : "repeat(auto-fill, minmax(260px,1fr))",
+                gap: isMobile ? 12 : 18,
+                width: "100%",
+                boxSizing: "border-box",
               }}
             >
               {filtered.map((e) => (
