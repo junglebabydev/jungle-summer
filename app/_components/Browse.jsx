@@ -7,6 +7,7 @@ import { Ico, Button } from "./Primitives.jsx";
 import { EventCard } from "./EventCard.jsx";
 import { MapIcon } from "lucide-react";
 import { supabase } from '@/lib/supabase';
+import MapboxMap from './MapboxWrapper.jsx';
 
 // ------------------------------------------------------------
 // Supabase → app vocabulary normalisation.
@@ -1948,7 +1949,7 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
                 boxSizing: "border-box",
               }}
             >
-              <MapPanel
+              <MapboxMap
                 events={filtered}
                 hoveredId={hoveredId}
                 setHovered={setHovered}
