@@ -49,10 +49,10 @@ export function SimpleHeader() {
         </a>
         
         <nav style={{ display: 'flex', gap: 40 }}>
-          <a href="/" style={{ 
-            color: '#374151', 
-            textDecoration: 'none', 
-            fontSize: 15, 
+          <a href="https://jungle.baby" style={{
+            color: '#374151',
+            textDecoration: 'none',
+            fontSize: 15,
             fontWeight: 500,
             transition: 'color 200ms'
           }}

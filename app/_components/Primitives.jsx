@@ -699,7 +699,7 @@ export function Nav({ go, theme }) {
                 }}
               >
                 {[
-                  ["Explore", "browse"],
+                  ["Explore", "https://jungle.baby"],
                   ["Summer", "landing"],
                   ["Contact", "contact"],
                 ].map(([l, route]) => (
@@ -707,13 +707,15 @@ export function Nav({ go, theme }) {
                     key={l}
                     onClick={(e) => {
                       e.preventDefault();
-                      if (route === 'contact') {
+                      if (route.startsWith('http')) {
+                        window.location.href = route;
+                      } else if (route === 'contact') {
                         window.location.href = '/contact';
                       } else if (route) {
                         go(route);
                       }
                     }}
-                    href={route === 'contact' ? '/contact' : '#'}
+                    href={route.startsWith('http') ? route : route === 'contact' ? '/contact' : '#'}
                     style={{
                       color: transparent ? fg : "#374151",
                       textDecoration: "none",
@@ -797,7 +799,7 @@ export function Nav({ go, theme }) {
           }}
         >
           {[
-            ["Explore", "browse"],
+            ["Explore", "https://jungle.baby"],
             ["Summer", "landing"],
             ["Contact", "contact"],
           ].map(([l, route], index) => (
@@ -805,7 +807,9 @@ export function Nav({ go, theme }) {
               key={l}
               onClick={(e) => {
                 e.preventDefault();
-                if (route === 'contact') {
+                if (route.startsWith('http')) {
+                  window.location.href = route;
+                } else if (route === 'contact') {
                   window.location.href = '/contact';
                 } else if (route) {
                   go(route);

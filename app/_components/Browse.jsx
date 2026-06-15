@@ -8,6 +8,59 @@ import { EventCard } from "./EventCard.jsx";
 import { MapIcon } from "lucide-react";
 import { supabase } from '@/lib/supabase';
 
+// ------------------------------------------------------------
+// Supabase → app vocabulary normalisation.
+// The things_to_do table stores lowercase values (type:"show",
+// area:"central", age_band:["all_ages"]) and has no `when` column,
+// while FILTERS/match expect capitalised keys and a `when` array
+// (today/weekend/week/june). These map the data onto that vocabulary
+// so Age/When/Area/Type filters actually match.
+// ------------------------------------------------------------
+const TYPE_MAP = {
+  attraction: "Attraction", outdoor: "Outdoor", show: "Show",
+  museum: "Museum", festival: "Festival", library: "Library",
+  free_event: "Free event",
+};
+const AREA_MAP = {
+  central: "Central", west: "West", north: "North",
+  east: "East", "north-east": "North-East",
+};
+const normType = (t) => TYPE_MAP[(t || "").toLowerCase()] || (t || "");
+const normArea = (a) => AREA_MAP[(a || "").toLowerCase()] || (a || "");
+const normAge = (bands) => {
+  const arr = Array.isArray(bands) ? bands : bands ? [bands] : ["all"];
+  return arr.map((b) => (b === "all_ages" ? "all" : b));
+};
+
+// Derive the when-buckets (today/weekend/week/june) an event falls into,
+// from its start/end dates relative to today. Events without dates default
+// to ['june'] so they still appear under "All June".
+function deriveWhen(startStr, endStr) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const parse = (s) => {
+    if (!s) return null;
+    const d = new Date(s);
+    return isNaN(d) ? null : (d.setHours(0, 0, 0, 0), d);
+  };
+  const start = parse(startStr);
+  if (!start) return ["june"];
+  const end = parse(endStr) || start;
+  const day = today.getDay(); // 0 Sun..6 Sat
+  const weekStart = new Date(today); weekStart.setDate(today.getDate() - ((day + 6) % 7)); // Monday
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); // Sunday
+  const weStart = new Date(weekStart); weStart.setDate(weekStart.getDate() + 5); // Saturday
+  const junS = new Date(today.getFullYear(), 5, 1);
+  const junE = new Date(today.getFullYear(), 5, 30);
+  const overlaps = (a, b) => start <= b && a <= end;
+  const when = [];
+  if (start <= today && today <= end) when.push("today");
+  if (overlaps(weStart, weekEnd)) when.push("weekend");
+  if (overlaps(weekStart, weekEnd)) when.push("week");
+  if (overlaps(junS, junE)) when.push("june");
+  return when.length ? when : ["june"];
+}
+
 // Helper function to get simple price text for map display
 function getSimpleMapPrice(e) {
   if (!e) return "Paid";
@@ -456,14 +509,37 @@ function SwipeView({ events, cardProps }) {
           width: "100%",
           maxWidth: "min(380px, calc(100vw - 40px))",
           height: "min(520px, calc(100vh - 200px))",
-          overflow: "hidden",
+          overflow: "visible",
         }}
       >
+        {/* Stacked cards behind, so it's clear there are more to swipe through */}
+        {events.length > 1 &&
+          [2, 1].map((depth) =>
+            events.length <= depth ? null : (
+              <div
+                key={`stack-${depth}`}
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: depth * 10,
+                  left: depth * 10,
+                  right: depth * 10,
+                  height: "100%",
+                  borderRadius: 20,
+                  background: "#fff",
+                  border: "1px solid #ECEAE3",
+                  boxShadow: "0 8px 20px rgba(0,0,0,0.07)",
+                  zIndex: 0,
+                }}
+              />
+            ),
+          )}
         <div
           style={{
             position: "absolute",
             width: "100%",
             height: "100%",
+            zIndex: 1,
             transform:
               swipeDirection === "left"
                 ? "translateX(-120%) rotate(-25deg)"
@@ -1370,8 +1446,8 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
             title: item.title || '',
             provider: item.provider_name || '',
             img: item.hero_image_url || 'placeholder',
-            area: item.area || 'Central',
-            age: item.age_band ? (Array.isArray(item.age_band) ? item.age_band : [item.age_band]) : ['all'],
+            area: normArea(item.area),
+            age: normAge(item.age_band),
             ageLabel: item.age_band ? (Array.isArray(item.age_band) ? item.age_band.join(', ') : item.age_band) : 'All ages',
             priceType: item.price_type || 'paid',
             price: item.price_display || '',
@@ -1381,8 +1457,9 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
               display: item.price_display || '',
               note: item.price_notes || null
             },
-            when: item.recurrence || ['today'],
-            type: item.type || 'activity',
+            when: deriveWhen(item.start_date, item.end_date),
+            type: normType(item.type),
+            festival: (item.type || '').toLowerCase() === 'festival',
             status: item.status || 'active',
             lat: item.latitude,
             lng: item.longitude,
@@ -1911,16 +1988,35 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
             </div>
           </div>
         ) : viewMode === "rows" ? (
-          <div>
-            {rowLanes.map((r) => (
-              <Row
-                key={r.key}
-                title={r.title}
-                events={r.events}
-                cardProps={cardProps}
-              />
-            ))}
-          </div>
+          anyFilter ? (
+            // A filter is active: swim lanes don't apply — show the matching
+            // events as a grid (the lanes are an unfiltered browse layout).
+            <div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(290px,1fr))",
+                  gap: 20,
+                }}
+              >
+                {filtered.map((e) => (
+                  <EventCard key={e.id} e={e} {...cardProps(e)} />
+                ))}
+              </div>
+              {!filtered.length && <Empty clearAll={clearAll} />}
+            </div>
+          ) : (
+            <div>
+              {rowLanes.map((r) => (
+                <Row
+                  key={r.key}
+                  title={r.title}
+                  events={r.events}
+                  cardProps={cardProps}
+                />
+              ))}
+            </div>
+          )
         ) : viewMode === "list" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Use same order as rows view - deduplicated events from rowLanes if no filters, otherwise use filtered */}
