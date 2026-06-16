@@ -1576,7 +1576,6 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
         minHeight: "100vh",
         fontFamily: "Manrope, sans-serif",
         width: "100%",
-        overflowX: "hidden",
       }}
     >
       {/* page head */}
@@ -1626,7 +1625,7 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
           <div
             style={{
               position: "sticky",
-              top: isMobile ? 60 : 72,
+              top: 0,
               zIndex: 25,
               background: "#fff",
               display: "flex",
@@ -1679,6 +1678,32 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
               open={openMenu}
               setOpen={setOpenMenu}
             />
+            {/* Map toggle button - positioned after Type filter */}
+            {mapMode === "collapsed" && (
+              <button
+                onClick={() => setShowMap(!showMap)}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  height: 42,
+                  padding: isMobile ? "0 12px" : "0 14px",
+                  borderRadius: 9999,
+                  border: showMap ? "1px solid #EEC71B" : "1px solid #DDD",
+                  background: showMap ? "#FFF9E5" : "#fff",
+                  color: showMap ? "#9B6F00" : "#333",
+                  fontFamily: "inherit",
+                  fontSize: isMobile ? 13 : 14,
+                  fontWeight: showMap ? 700 : 600,
+                  cursor: "pointer",
+                  transition: "all 150ms",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <MapIcon size={18} strokeWidth={2} />
+                {isMobile ? "Map" : (showMap ? "Hide Map" : "Show Map")}
+              </button>
+            )}
             {anyFilter && (
               <button
                 onClick={clearAll}
@@ -1698,36 +1723,10 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
               </button>
             )}
             <div style={{ flex: 1 }} />
-            {/* Map toggle button - only show on desktop */}
-            {mapMode === "collapsed" && !isMobile && (
-              <button
-                onClick={() => setShowMap(!showMap)}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  height: 42,
-                  padding: "0 14px",
-                  borderRadius: 9999,
-                  border: `1px solid ${showMap ? "#009B4D" : "#DDD"}`,
-                  background: showMap ? "#E5F5ED" : "#fff",
-                  color: showMap ? "#0C3C26" : "#333",
-                  fontFamily: "inherit",
-                  fontSize: 14,
-                  fontWeight: showMap ? 700 : 600,
-                  cursor: "pointer",
-                  transition: "all 150ms",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <MapIcon size={18} strokeWidth={2} />
-                {showMap ? "Hide Map" : "Show Map"}
-              </button>
-            )}
-            {/* View mode switcher */}
+            {/* View mode switcher - hide on mobile when map is shown */}
             <div
               style={{
-                display: "flex",
+                display: (isMobile && showMap) ? "none" : "flex",
                 gap: 4,
                 padding: 4,
                 background: "#F5F5F0",
@@ -1926,27 +1925,34 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
           padding: isMobile ? "20px 16px 40px" : "26px clamp(20px,4vw,40px) 80px",
           width: "100%",
           boxSizing: "border-box",
+          position: "relative",
         }}
       >
-        {showMap && !isMobile ? (
+        {showMap ? (
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1.05fr) minmax(0,1fr)",
+              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
               gap: isMobile ? 16 : 24,
               alignItems: "start",
+              position: "relative",
+              minHeight: isMobile ? "auto" : "calc(100vh - 200px)",
             }}
           >
             <div
               style={{
                 position: isMobile ? "relative" : "sticky",
-                top: isMobile ? 0 : 140,
-                height: isMobile ? "350px" : "calc(100vh - 170px)",
-                minHeight: isMobile ? "300px" : "460px",
+                top: isMobile ? 0 : 70,
+                height: isMobile ? "350px" : "calc(100vh - 100px)",
+                maxHeight: isMobile ? "350px" : "calc(100vh - 100px)",
                 width: "100%",
-                marginBottom: isMobile ? 16 : 0,
+                marginBottom: isMobile ? 20 : 0,
                 order: 0,
                 boxSizing: "border-box",
+                zIndex: 10,
+                alignSelf: "start",
+                borderRadius: isMobile ? 18 : 0,
+                overflow: "hidden",
               }}
             >
               <MapboxMap
@@ -1959,32 +1965,43 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
             </div>
             <div
               style={{
-                display: "grid",
+                display: isMobile ? "flex" : "grid",
+                flexDirection: isMobile ? "column" : undefined,
                 gridTemplateColumns: isMobile 
-                  ? "1fr" 
-                  : "repeat(auto-fill, minmax(260px,1fr))",
-                gap: isMobile ? 12 : 18,
+                  ? undefined 
+                  : "repeat(auto-fill, minmax(280px,1fr))",
+                gap: isMobile ? 16 : 18,
                 width: "100%",
                 boxSizing: "border-box",
+                minHeight: isMobile ? "auto" : "100vh",
+                alignContent: "start",
               }}
             >
-              {filtered.map((e) => (
-                <div
-                  key={e.id}
-                  onMouseEnter={() => setHovered(e.id)}
-                  onMouseLeave={() => setHovered(null)}
-                  style={{
-                    outline:
-                      hoveredId === e.id
-                        ? "2px solid #009B4D"
-                        : "2px solid transparent",
-                    borderRadius: 18,
-                    transition: "outline-color 140ms",
-                  }}
-                >
-                  <EventCard e={e} {...cardProps(e)} />
-                </div>
-              ))}
+              {isMobile ? (
+                // Mobile: Use ListCard view
+                filtered.map((e) => (
+                  <ListCard key={e.id} e={e} {...cardProps(e)} />
+                ))
+              ) : (
+                // Desktop: Use regular EventCard
+                filtered.map((e) => (
+                  <div
+                    key={e.id}
+                    onMouseEnter={() => setHovered(e.id)}
+                    onMouseLeave={() => setHovered(null)}
+                    style={{
+                      outline:
+                        hoveredId === e.id
+                          ? "2px solid #009B4D"
+                          : "2px solid transparent",
+                      borderRadius: 18,
+                      transition: "outline-color 140ms",
+                    }}
+                  >
+                    <EventCard e={e} {...cardProps(e)} />
+                  </div>
+                ))
+              )}
               {!filtered.length && <Empty clearAll={clearAll} />}
             </div>
           </div>
