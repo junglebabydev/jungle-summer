@@ -1431,9 +1431,17 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
     const fetchEvents = async () => {
       setIsLoadingEvents(true);
       try {
+        // Only ever expose reviewed listings publicly. We intentionally do
+        // NOT rely on RLS for this gate (RLS is not enforced on this table —
+        // the anon key can read drafts directly). status IN (active,expired)
+        // keeps approved-but-ended events flowing so the "Show expired"
+        // toggle still works; draft / needs_review / rejected / archived are
+        // never sent to the browser.
         const { data, error } = await supabase
           .from('things_to_do')
           .select('*')
+          .eq('review_status', 'approved')
+          .in('status', ['active', 'expired'])
           .order('created_at', { ascending: false });
         
         if (error) {

@@ -1,0 +1,40 @@
+name: CI
+
+# Test gate: runs the eval/accuracy suite and a production build on every
+# push and pull request, so eval regressions or build breaks are caught
+# before Vercel deploys.
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Eval / accuracy tests
+        run: npm run eval:test
+
+      # Lint is best-effort until an ESLint config is added to the repo
+      # (`next lint` currently has no config to run against).
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
+        env:
+          # Placeholder values so the Supabase client (created at module load)
+          # doesn't throw on an invalid URL during the prerender step. No real
+          # secrets are needed to build — data is fetched client-side at runtime.
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
