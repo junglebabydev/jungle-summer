@@ -20,8 +20,28 @@ all it takes to show/hide it:
 | Retire an ended event | `status=expired`                               |
 | Send back to queue    | `review_status=needs_review`, `status=draft`   |
 
-New rows (e.g. from the Excel uploader at `/admin`) land as
-`needs_review` + `draft`, so nothing is public until a human approves it.
+## Ingestion: auto-publish except hard errors
+
+New events from the weekly routine are ingested through `scripts/ingest.mjs`,
+which runs the eval on each record and routes it by `eval.autoPublishable`:
+
+- **clean + on-category** → `approved` + `active` (goes live with no review)
+- **hard error / off-category / marketplace duplicate** → `needs_review` +
+  `draft` (held on `/admin/review` for individual or bulk approval)
+
+```bash
+node scripts/ingest.mjs ../jungle-summer-extract/output/results_new.csv          # dry run
+node scripts/ingest.mjs ../jungle-summer-extract/output/results_new.csv --apply  # write
+```
+
+This is what limits weekly approvals: a typical run auto-publishes ~75% and
+holds only the flagged minority. `autoPublishable = no error-level flags AND
+on-category (not a recurring class/camp, not a www.jungle.baby merchant)`.
+To loosen it to error-level only, drop the `categoryOk` term in `lib/eval.mjs`.
+
+The Excel uploader at `/admin` is the manual fallback; its rows land as
+`needs_review` + `draft` (conservatively held), so nothing from a hand upload
+goes live without review.
 
 > **Note (2026-06-29):** RLS on `things_to_do` was found NOT to be enforced —
 > the anon key could read all rows (including drafts and `raw_payload`)

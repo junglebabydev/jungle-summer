@@ -9,6 +9,7 @@
     "lint": "next lint",
     "sync-marketplace": "node scripts/sync-marketplace.mjs",
     "analyze": "node scripts/analyze.mjs",
+    "ingest": "node scripts/ingest.mjs",
     "eval:test": "node --test scripts/eval.test.mjs",
     "expire": "node scripts/expire.mjs"
   },

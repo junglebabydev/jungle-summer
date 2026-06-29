@@ -43,6 +43,18 @@ test('clean on-category event passes with no flags', () => {
   assert.equal(rep.score, 1);
 });
 
+test('autoPublishable: clean event auto-publishes; errors and off-category are held', () => {
+  assert.equal(evaluateRecord(goodEvent, opts).autoPublishable, true);
+  // hard error → held
+  assert.equal(evaluateRecord({ ...goodEvent, type: 'workshop' }, opts).autoPublishable, false);
+  // off-category (recurring class) → held even though it's only a warn
+  assert.equal(evaluateRecord({ ...goodEvent, title: 'Weekly Piano Class' }, opts).autoPublishable, false);
+  // marketplace duplicate → held
+  assert.equal(evaluateRecord({ ...goodEvent, provider_name: 'Cristofori Music School' }, opts).autoPublishable, false);
+  // a minor warn (missing image) still auto-publishes
+  assert.equal(evaluateRecord({ ...goodEvent, hero_image_url: '' }, opts).autoPublishable, true);
+});
+
 test('invalid enum type is an error', () => {
   const rep = evaluateRecord({ ...goodEvent, type: 'workshop' }, opts);
   assert.ok(codes(rep).includes('bad_type'));
