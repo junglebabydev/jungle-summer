@@ -66,7 +66,7 @@ const EDIT_FIELDS = [
   ['description', 'Description'],
 ];
 
-function RecordCard({ rec, secret, onChanged }) {
+function RecordCard({ rec, secret, onChanged, selected, onToggleSelect }) {
   const [busy, setBusy] = useState(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState({});
@@ -96,6 +96,13 @@ function RecordCard({ rec, secret, onChanged }) {
   return (
     <div style={{ ...box, padding: 20, marginBottom: 16, border: ev.hasError ? '1px solid #FCA5A5' : '1px solid #EEE' }}>
       <div style={{ display: 'flex', gap: 16 }}>
+        <input
+          type="checkbox"
+          checked={!!selected}
+          onChange={() => onToggleSelect(rec.id)}
+          title="Select for bulk action"
+          style={{ width: 18, height: 18, marginTop: 2, cursor: 'pointer', accentColor: GREEN, flexShrink: 0 }}
+        />
         {rec.hero_image_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={rec.hero_image_url} alt="" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, flexShrink: 0, background: '#F3F4F6' }} />
@@ -168,6 +175,14 @@ export default function ReviewPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
+  const [selected, setSelected] = useState(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const toggleSelect = (id) => setSelected((prev) => {
+    const next = new Set(prev);
+    next.has(id) ? next.delete(id) : next.add(id);
+    return next;
+  });
 
   useEffect(() => {
     const s = sessionStorage.getItem(SECRET_KEY);
@@ -188,12 +203,34 @@ export default function ReviewPage() {
       }
       const json = await res.json();
       setData(json);
+      setSelected(new Set()); // selection is stale after a reload
     } catch (e) {
       setAuthError(e.message);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const bulkAct = async (action) => {
+    const ids = [...selected];
+    if (!ids.length) return;
+    if (!confirm(`${action} ${ids.length} listing(s)?`)) return;
+    setBulkBusy(true);
+    try {
+      const res = await fetch('/api/admin/things/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-secret': secret },
+        body: JSON.stringify({ action, ids }),
+      });
+      const json = await res.json();
+      if (!res.ok) { alert(`Failed: ${json.error || res.status}`); return; }
+      await load(secret, tab);
+    } catch (e) {
+      alert(`Error: ${e.message}`);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
 
   useEffect(() => { if (secret) load(secret, tab); }, [secret, tab, load]);
 
@@ -247,10 +284,35 @@ export default function ReviewPage() {
           </div>
         )}
 
+        {!loading && data?.records?.length > 0 && (() => {
+          const recs = data.records;
+          const cleanIds = recs.filter((r) => !r.eval?.hasError).map((r) => r.id);
+          const allSelected = selected.size === recs.length && recs.length > 0;
+          return (
+            <div style={{ ...box, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', position: 'sticky', top: 8, zIndex: 5 }}>
+              <button onClick={() => setSelected(allSelected ? new Set() : new Set(recs.map((r) => r.id)))} style={btn('#fff', '#374151')}>
+                {allSelected ? 'Deselect all' : `Select all (${recs.length})`}
+              </button>
+              <button onClick={() => setSelected(new Set(cleanIds))} style={btn('#fff', '#374151')} title="Select records with no error-level flags">
+                Select clean ({cleanIds.length})
+              </button>
+              <span style={{ fontSize: 14, color: '#374151', fontWeight: 700 }}>{selected.size} selected</span>
+              <div style={{ flex: 1 }} />
+              <button onClick={() => bulkAct('approve')} disabled={!selected.size || bulkBusy} style={{ ...btn(GREEN), opacity: !selected.size || bulkBusy ? 0.5 : 1 }}>
+                {bulkBusy ? '…' : `✓ Approve selected`}
+              </button>
+              <button onClick={() => bulkAct('reject')} disabled={!selected.size || bulkBusy} style={{ ...btn('#DC2626'), opacity: !selected.size || bulkBusy ? 0.5 : 1 }}>
+                ✕ Reject selected
+              </button>
+            </div>
+          );
+        })()}
+
         {loading && <div style={{ padding: 40, textAlign: 'center', color: '#666' }}>Loading…</div>}
         {!loading && data?.records?.length === 0 && <div style={{ ...box, padding: 40, textAlign: 'center', color: '#666' }}>Nothing here.</div>}
         {!loading && data?.records?.map((rec) => (
-          <RecordCard key={rec.id} rec={rec} secret={secret} onChanged={() => load(secret, tab)} />
+          <RecordCard key={rec.id} rec={rec} secret={secret} onChanged={() => load(secret, tab)}
+            selected={selected.has(rec.id)} onToggleSelect={toggleSelect} />
         ))}
       </div>
     </div>
