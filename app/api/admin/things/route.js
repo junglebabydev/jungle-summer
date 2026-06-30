@@ -12,10 +12,15 @@ export async function GET(request) {
 
   const { searchParams } = new URL(request.url);
   const reviewStatus = searchParams.get('review_status'); // optional filter
+  const newDays = searchParams.get('new_days');           // "this week's delta"
 
   const supabase = getAdminClient();
   let query = supabase.from('things_to_do').select('*').order('created_at', { ascending: false });
   if (reviewStatus) query = query.eq('review_status', reviewStatus);
+  if (newDays && Number(newDays) > 0) {
+    const since = new Date(Date.now() - Number(newDays) * 86400000).toISOString();
+    query = query.gte('created_at', since);
+  }
 
   const { data, error } = await query;
   if (error) return Response.json({ error: error.message }, { status: 500 });

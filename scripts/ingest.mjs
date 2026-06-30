@@ -21,7 +21,8 @@ import { evaluateRecord } from '../lib/eval.mjs';
 
 const file = process.argv[2];
 const apply = process.argv.includes('--apply');
-if (!file) { console.error('Usage: node scripts/ingest.mjs <results_new.csv> [--apply]'); process.exit(1); }
+const newOnly = process.argv.includes('--new-only');
+if (!file) { console.error('Usage: node scripts/ingest.mjs <csv> [--new-only] [--apply]'); process.exit(1); }
 
 // ── Minimal CSV parser (handles quoted fields, commas, escaped quotes) ──
 function parseCSV(text) {
@@ -85,7 +86,17 @@ function toRecord(r) {
 }
 
 const marketplaceNames = loadMarketplaceNames();
-const rows = parseCSV(readFileSync(file, 'utf8')).map(toRecord).filter((r) => r.slug);
+let raw = parseCSV(readFileSync(file, 'utf8'));
+// --new-only: keep just this run's delta. The CSV's first_seen column is
+// stamped with the run date for genuinely-new titles; the latest first_seen
+// present is the most recent batch. Lets the routine ingest the geocoded delta
+// straight from the full results.csv.
+if (newOnly) {
+  const latest = raw.map((r) => r.first_seen).filter(Boolean).sort().at(-1);
+  raw = raw.filter((r) => r.first_seen === latest);
+  console.log(`--new-only: latest first_seen=${latest} → ${raw.length} delta rows`);
+}
+const rows = raw.map(toRecord).filter((r) => r.slug);
 
 // Skip slugs that already exist (idempotent).
 const slugs = rows.map((r) => r.slug);

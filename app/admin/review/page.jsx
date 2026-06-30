@@ -18,6 +18,7 @@ const INK = '#0C3C26';
 const SECRET_KEY = 'admin_review_secret';
 
 const TABS = [
+  { key: 'new', label: 'New this week' },
   { key: 'needs_review', label: 'Needs review' },
   { key: 'approved', label: 'Live' },
   { key: 'rejected', label: 'Rejected' },
@@ -171,7 +172,7 @@ function RecordCard({ rec, secret, onChanged, selected, onToggleSelect }) {
 export default function ReviewPage() {
   const [secret, setSecret] = useState('');
   const [input, setInput] = useState('');
-  const [tab, setTab] = useState('needs_review');
+  const [tab, setTab] = useState('new');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState('');
@@ -193,7 +194,7 @@ export default function ReviewPage() {
     setLoading(true);
     setAuthError('');
     try {
-      const qs = t === 'all' ? '' : `?review_status=${t}`;
+      const qs = t === 'all' ? '' : t === 'new' ? '?new_days=7' : `?review_status=${t}`;
       const res = await fetch(`/api/admin/things${qs}`, { headers: { 'x-admin-secret': sec } });
       if (res.status === 401) {
         setAuthError('Incorrect secret.');
@@ -268,6 +269,26 @@ export default function ReviewPage() {
       </div>
 
       <div style={{ maxWidth: 1000, margin: '0 auto', padding: '24px 20px' }}>
+        <details style={{ ...box, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: '#374151' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 700, color: INK }}>How to review (read me)</summary>
+          <div style={{ marginTop: 10, lineHeight: 1.6 }}>
+            <p style={{ margin: '0 0 8px' }}>Each week the crawl ingests new things-to-do. <b>Clean, on-category events auto-publish</b> (they appear under <b>Live</b>). Anything with a red <b>ERROR</b> flag — broken data, a recurring class/camp, or a provider already on www.jungle.baby — is <b>held here for you</b>.</p>
+            <ol style={{ margin: '0 0 8px', paddingLeft: 18 }}>
+              <li><b>New this week</b> shows everything ingested in the last 7 days (the delta). Start here.</li>
+              <li><b>Needs review</b> is the held queue. Read each card&rsquo;s flags:
+                <ul style={{ paddingLeft: 16, marginTop: 4 }}>
+                  <li><span style={{ color: '#B91C1C', fontWeight: 700 }}>ERROR</span> — likely wrong / duplicate / off-category. Usually <b>Reject</b>.</li>
+                  <li><span style={{ color: '#92400E', fontWeight: 700 }}>WARN</span> — minor (missing image, price wording). Fix via <b>Edit</b>, then approve.</li>
+                </ul>
+              </li>
+              <li>Use the checkboxes + <b>Select clean</b> → <b>Approve selected</b> to bulk-approve the good ones in one click. Approve = live on the site immediately.</li>
+              <li><b>Reject</b> hides a listing; <b>Edit</b> fixes fields inline; <b>Restore</b> puts a rejected/expired one back in the queue.</li>
+              <li>Spot-check the <b>Live</b> tab too — auto-published records still show their flags, so you can <b>Hide</b> any that slipped through.</li>
+            </ol>
+            <p style={{ margin: 0, color: '#6B7280' }}>Ended events drop off automatically (daily expiry). Full runbook: <code>docs/REVIEW_GUIDE.md</code>.</p>
+          </div>
+        </details>
+
         <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           {TABS.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key)}
