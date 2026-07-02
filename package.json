@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3004",
+    "dev:auto": "next dev",
     "build": "next build",
     "start": "next start -p 3004",
     "lint": "next lint",
