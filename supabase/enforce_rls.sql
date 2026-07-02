@@ -34,5 +34,16 @@ create policy "public read reviewed things"
   to anon
   using (review_status = 'approved' and status in ('active', 'expired'));
 
--- Writes remain service-role only (the review API uses the service key,
--- which bypasses RLS). No insert/update/delete policy for anon is created.
+-- The /admin Excel uploader (app/admin/page.jsx) inserts new rows using the
+-- ANON key directly from the browser — this is almost certainly why a
+-- permissive policy existed before (an insert-only need got solved with a
+-- `for all`-style policy, which also opened SELECT as a side effect).
+-- Restore just the insert, scoped so a submitted row can NEVER self-approve:
+-- it must land as needs_review/draft, same as the ingest pipeline's held path.
+create policy "anon insert new things as needs_review draft"
+  on things_to_do for insert
+  to anon
+  with check (review_status = 'needs_review' and status = 'draft');
+
+-- All other writes (approve/reject/expire/edit) remain service-role only —
+-- the review API uses the service key, which bypasses RLS.
