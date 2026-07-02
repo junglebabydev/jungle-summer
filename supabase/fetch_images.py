@@ -14,7 +14,7 @@ Outputs:
 
 Usage:
   SUPABASE_URL=https://xxx.supabase.co \
-  SUPABASE_SERVICE_KEY=eyJhbGci... \
+  SUPABASE_SERVICE_KEY=<rotate-and-put-your-own-here> \
   python3 fetch_images.py
 
   Or set them in .env.local in this directory.
