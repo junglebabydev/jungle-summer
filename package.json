@@ -6,7 +6,12 @@
     "dev": "next dev -p 3004",
     "build": "next build",
     "start": "next start -p 3004",
-    "lint": "next lint"
+    "lint": "next lint",
+    "sync-marketplace": "node scripts/sync-marketplace.mjs",
+    "analyze": "node scripts/analyze.mjs",
+    "ingest": "node scripts/ingest.mjs",
+    "eval:test": "node --test scripts/eval.test.mjs",
+    "expire": "node scripts/expire.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.1",
