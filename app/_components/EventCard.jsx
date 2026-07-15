@@ -121,9 +121,9 @@ export function EventCard({e, onOpen, onShare, wide=false}) {
 
         {/* Meta pills */}
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 'auto', marginBottom: 11 }}>
-          <MetaPill><span style={{ color: '#009B4D' }}>{Ico.pin(11)}</span>{e.area}</MetaPill>
-          <MetaPill>{e.ageLabel}</MetaPill>
-          <MetaPill>{e.indoorOutdoor}</MetaPill>
+          {e.area && <MetaPill><span style={{ color: '#009B4D' }}>{Ico.pin(11)}</span>{e.area}</MetaPill>}
+          {e.ageLabel && <MetaPill>{e.ageLabel}</MetaPill>}
+          {e.indoorOutdoor && <MetaPill>{e.indoorOutdoor}</MetaPill>}
         </div>
 
         {/* ── Pricing + CTA ── */}

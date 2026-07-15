@@ -30,6 +30,34 @@ export const normAge = (bands) => {
   return arr.map((b) => (b === "all_ages" ? "all" : b));
 };
 
+// Age band -> human display label, e.g. ['4-6','all_ages'] -> "4–6, All Ages".
+const AGE_LABELS = { "0-3": "0–3", "4-6": "4–6", "7-12": "7–12", all_ages: "All Ages", all: "All Ages" };
+export const ageLabelFor = (bands) => {
+  const arr = Array.isArray(bands) ? bands : bands ? [bands] : null;
+  if (!arr || !arr.length) return "All Ages";
+  return arr.map((b) => AGE_LABELS[b] || b).join(", ");
+};
+
+// "indoor" -> "Indoor", "north-east" stays untouched (area has its own map).
+const INDOOR_OUTDOOR_LABELS = { indoor: "Indoor", outdoor: "Outdoor", both: "Indoor & Outdoor" };
+export const indoorOutdoorLabelFor = (v) => INDOOR_OUTDOOR_LABELS[(v || "").toLowerCase()] || "";
+
+// "2026-07-12" -> "12 Jul 26". Falls through to the raw string if unparseable
+// rather than hiding the date entirely.
+function formatDate(s) {
+  const d = new Date(`${s}T00:00:00`);
+  if (isNaN(d.getTime())) return s;
+  const day = d.getDate();
+  const month = d.toLocaleString('en-GB', { month: 'short' });
+  const year = String(d.getFullYear()).slice(-2);
+  return `${day} ${month} ${year}`;
+}
+export function dateRangeFor(startStr, endStr) {
+  if (!startStr) return 'Ongoing';
+  if (!endStr || endStr === startStr) return formatDate(startStr);
+  return `${formatDate(startStr)} to ${formatDate(endStr)}`;
+}
+
 // Derive the when-buckets (today/weekend/week/june) an event falls into,
 // from its start/end dates relative to TODAY (computed fresh on every call —
 // this is what makes "Happening this week" actually mean this week, instead
@@ -71,15 +99,17 @@ export function transformRecord(item) {
     img: item.hero_image_url || 'placeholder',
     area: normArea(item.area),
     age: normAge(item.age_band),
-    ageLabel: item.age_band ? (Array.isArray(item.age_band) ? item.age_band.join(', ') : item.age_band) : 'All ages',
+    ageLabel: ageLabelFor(item.age_band),
+    indoorOutdoor: indoorOutdoorLabelFor(item.indoor_outdoor),
     priceType: item.price_type || 'paid',
     price: item.price_display || '',
     priceDisplay: item.price_display || 'Free',
-    priceInfo: {
-      type: item.price_type || 'paid',
-      display: item.price_display || '',
-      note: item.price_notes || null,
-    },
+    // No `priceInfo` here on purpose — EventCard's priceInfoFor() derives a
+    // short "From $X" display from priceType/priceDisplay on the fly (with
+    // an asterisk when multiple prices/conditions are detected). Pre-setting
+    // priceInfo.display to the raw price_display text short-circuits that and
+    // was why long price strings ("$15 (adult) | $10 (child 3-12) | Free
+    // (below 3)") were bleeding out of the card instead of showing "From $10*".
     when: deriveWhen(item.start_date, item.end_date),
     type: normType(item.type),
     festival: (item.type || '').toLowerCase() === 'festival',
@@ -91,7 +121,7 @@ export function transformRecord(item) {
     description: item.description || item.long_description || '',
     longBlurb: item.long_description || item.description || '',
     blurb: item.description || '',
-    dates: item.start_date ? `${item.start_date} - ${item.end_date || item.start_date}` : 'Ongoing',
+    dates: dateRangeFor(item.start_date, item.end_date),
     times: item.times || '',
     recurrence: item.recurrence || '',
     bookingRequired: item.booking_required || false,
