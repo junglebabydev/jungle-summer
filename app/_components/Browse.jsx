@@ -2,65 +2,12 @@
 // MapPanel — stylized Singapore map with event pins (placeholder)
 // ============================================================
 import React from "react";
-import { EVENTS as FALLBACK_EVENTS, ROWS, FILTERS, IMG, priceText, dedupeLanes } from "./data.jsx";
+import { ROWS, FILTERS, IMG, priceText, dedupeLanes } from "./data.jsx";
 import { Ico, Button } from "./Primitives.jsx";
 import { EventCard } from "./EventCard.jsx";
 import { MapIcon } from "lucide-react";
-import { supabase } from '@/lib/supabase';
+import { fetchLiveEvents } from './liveEvents.js';
 import MapboxMap from './MapboxWrapper.jsx';
-
-// ------------------------------------------------------------
-// Supabase → app vocabulary normalisation.
-// The things_to_do table stores lowercase values (type:"show",
-// area:"central", age_band:["all_ages"]) and has no `when` column,
-// while FILTERS/match expect capitalised keys and a `when` array
-// (today/weekend/week/june). These map the data onto that vocabulary
-// so Age/When/Area/Type filters actually match.
-// ------------------------------------------------------------
-const TYPE_MAP = {
-  attraction: "Attraction", outdoor: "Outdoor", show: "Show",
-  museum: "Museum", festival: "Festival", library: "Library",
-  free_event: "Free event",
-};
-const AREA_MAP = {
-  central: "Central", west: "West", north: "North",
-  east: "East", "north-east": "North-East",
-};
-const normType = (t) => TYPE_MAP[(t || "").toLowerCase()] || (t || "");
-const normArea = (a) => AREA_MAP[(a || "").toLowerCase()] || (a || "");
-const normAge = (bands) => {
-  const arr = Array.isArray(bands) ? bands : bands ? [bands] : ["all"];
-  return arr.map((b) => (b === "all_ages" ? "all" : b));
-};
-
-// Derive the when-buckets (today/weekend/week/june) an event falls into,
-// from its start/end dates relative to today. Events without dates default
-// to ['june'] so they still appear under "All June".
-function deriveWhen(startStr, endStr) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const parse = (s) => {
-    if (!s) return null;
-    const d = new Date(s);
-    return isNaN(d) ? null : (d.setHours(0, 0, 0, 0), d);
-  };
-  const start = parse(startStr);
-  if (!start) return ["june"];
-  const end = parse(endStr) || start;
-  const day = today.getDay(); // 0 Sun..6 Sat
-  const weekStart = new Date(today); weekStart.setDate(today.getDate() - ((day + 6) % 7)); // Monday
-  const weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); // Sunday
-  const weStart = new Date(weekStart); weStart.setDate(weekStart.getDate() + 5); // Saturday
-  const junS = new Date(today.getFullYear(), 5, 1);
-  const junE = new Date(today.getFullYear(), 5, 30);
-  const overlaps = (a, b) => start <= b && a <= end;
-  const when = [];
-  if (start <= today && today <= end) when.push("today");
-  if (overlaps(weStart, weekEnd)) when.push("weekend");
-  if (overlaps(weekStart, weekEnd)) when.push("week");
-  if (overlaps(junS, junE)) when.push("june");
-  return when.length ? when : ["june"];
-}
 
 // Helper function to get simple price text for map display
 function getSimpleMapPrice(e) {
@@ -1426,77 +1373,12 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
   const [events, setEvents] = React.useState([]);
   const [isLoadingEvents, setIsLoadingEvents] = React.useState(true);
   
-  // Fetch events from Supabase
+  // Fetch events from Supabase (shared with Landing.jsx — see liveEvents.js)
   React.useEffect(() => {
-    const fetchEvents = async () => {
-      setIsLoadingEvents(true);
-      try {
-        // Only ever expose reviewed listings publicly. We intentionally do
-        // NOT rely on RLS for this gate (RLS is not enforced on this table —
-        // the anon key can read drafts directly). status IN (active,expired)
-        // keeps approved-but-ended events flowing so the "Show expired"
-        // toggle still works; draft / needs_review / rejected / archived are
-        // never sent to the browser.
-        const { data, error } = await supabase
-          .from('things_to_do')
-          .select('*')
-          .eq('review_status', 'approved')
-          .in('status', ['active', 'expired'])
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Error fetching events:', error);
-          // Fallback to hardcoded data if API fails
-          setEvents(FALLBACK_EVENTS);
-        } else {
-          // Transform API data to match the expected format
-          const transformedEvents = (data || []).map(item => ({
-            id: item.slug || item.id,
-            title: item.title || '',
-            provider: item.provider_name || '',
-            img: item.hero_image_url || 'placeholder',
-            area: normArea(item.area),
-            age: normAge(item.age_band),
-            ageLabel: item.age_band ? (Array.isArray(item.age_band) ? item.age_band.join(', ') : item.age_band) : 'All ages',
-            priceType: item.price_type || 'paid',
-            price: item.price_display || '',
-            priceDisplay: item.price_display || 'Free',
-            priceInfo: {
-              type: item.price_type || 'paid',
-              display: item.price_display || '',
-              note: item.price_notes || null
-            },
-            when: deriveWhen(item.start_date, item.end_date),
-            type: normType(item.type),
-            festival: (item.type || '').toLowerCase() === 'festival',
-            status: item.status || 'active',
-            lat: item.latitude,
-            lng: item.longitude,
-            venue: item.venue_name || '',
-            venueAddress: item.venue_address || '',
-            description: item.description || item.long_description || '',
-            longBlurb: item.long_description || item.description || '',
-            blurb: item.description || '',
-            dates: item.start_date ? `${item.start_date} - ${item.end_date || item.start_date}` : 'Ongoing',
-            times: item.times || '',
-            recurrence: item.recurrence || '',
-            bookingRequired: item.booking_required || false,
-            bookingUrl: item.booking_url || '',
-            tags: item.categories ? (Array.isArray(item.categories) ? item.categories : [item.categories]) : [],
-            media: [], // EventDetail expects a media array
-            pin: null, // Add pin as null since we use lat/lng
-          }));
-          setEvents(transformedEvents);
-        }
-      } catch (err) {
-        console.error('Failed to fetch events:', err);
-        setEvents(FALLBACK_EVENTS);
-      } finally {
-        setIsLoadingEvents(false);
-      }
-    };
-    
-    fetchEvents();
+    setIsLoadingEvents(true);
+    fetchLiveEvents()
+      .then(setEvents)
+      .finally(() => setIsLoadingEvents(false));
   }, []);
   
   React.useEffect(() => {
@@ -1532,7 +1414,7 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
 
   // Deduped lanes: an event shows only in the first row it matches, so the same
   // card never repeats across swim lanes. Render order = claim priority.
-  const rowLanes = React.useMemo(() => dedupeLanes(ROWS), []);
+  const rowLanes = React.useMemo(() => dedupeLanes(ROWS, 4, [], events), [events]);
 
   const cardProps = (e) => ({
     onOpen: () => go("detail", e),
