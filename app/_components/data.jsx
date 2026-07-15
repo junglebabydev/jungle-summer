@@ -3633,6 +3633,16 @@ function _firstAmount(text){
   return s.replace(/^s\$/i,'S$');
 }
 
+// True when the raw text names more than one price (e.g. "$15 (adult) |
+// $10 (child 3-12) | Free (below 3)") — the card shows just the lowest/first
+// amount, so this flags that there's more nuance behind it (see the card's
+// asterisk + the full text on the detail page).
+function _hasMultiplePrices(text){
+  if(!text) return false;
+  const matches = text.match(/S?\$\s?\d+(?:\.\d{1,2})?/gi) || [];
+  return matches.length > 1;
+}
+
 // Derive structured priceInfo from a record's existing priceType/priceDisplay.
 // Returns { type:'free'|'paid'|'mixed', display?, freeFor?, paidDisplay?, note?, fullText? }
 export function priceInfoFor(e){
@@ -3645,6 +3655,10 @@ export function priceInfoFor(e){
 
   if(e.priceType === 'mixed'){
     const amt = _firstAmount(text);
+    // Star the amount when the raw text names more than one price/condition —
+    // "From $10*" signals there's nuance beyond this single number (full
+    // wording is on the detail page via fullText).
+    const amtDisplay = amt ? `From ${amt}${_hasMultiplePrices(text) ? '*' : ''}` : null;
     // Delimiters between free clause and paid clause are ; or ". " (sentence end),
     // NOT commas — the freeFor phrase often contains commas itself.
     // Pattern A: "Free for X; from $Y for others (note)"
@@ -3653,7 +3667,7 @@ export function priceInfoFor(e){
       return {
         type:'mixed',
         freeFor: m[1].trim().replace(/\s+/g,' '),
-        paidDisplay: amt ? `From ${amt}` : 'Admission applies',
+        paidDisplay: amtDisplay || 'Admission applies',
         note: m[3] ? m[3].trim() : null,
         fullText: text
       };
@@ -3664,7 +3678,7 @@ export function priceInfoFor(e){
       return {
         type:'mixed',
         freeFor: m[1].trim().replace(/\s+/g,' '),
-        paidDisplay: amt ? `From ${amt}` : 'Admission applies',
+        paidDisplay: amtDisplay || 'Admission applies',
         note: null,
         fullText: text
       };
@@ -3676,7 +3690,7 @@ export function priceInfoFor(e){
       return {
         type:'mixed',
         freeFor: ff,
-        paidDisplay: amt ? `From ${amt}` : 'Some paid',
+        paidDisplay: amtDisplay || 'Some paid',
         note: null,
         fullText: text
       };
@@ -3684,7 +3698,7 @@ export function priceInfoFor(e){
     return {
       type:'mixed',
       freeFor: 'some visitors',
-      paidDisplay: amt ? `From ${amt}` : 'Some paid',
+      paidDisplay: amtDisplay || 'Some paid',
       note: null,
       fullText: text
     };
@@ -3694,7 +3708,7 @@ export function priceInfoFor(e){
   const amt = _firstAmount(text);
   return {
     type:'paid',
-    display: amt ? `From ${amt}` : (text.length > 28 ? 'Paid entry' : text),
+    display: amt ? `From ${amt}${_hasMultiplePrices(text) ? '*' : ''}` : (text.length > 28 ? 'Paid entry' : text),
     fullText: text
   };
 }
