@@ -10,7 +10,8 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EVENTS, ROWS, IMG, priceText, dedupeLanes } from './data.jsx';
+import { EVENTS as INITIAL_EVENTS, ROWS, IMG, priceText, dedupeLanes } from './data.jsx';
+import { fetchLiveEvents } from './liveEvents.js';
 import { Ico, Button, MetaPill, Nav, Footer } from './Primitives.jsx';
 import { EventCard } from './EventCard.jsx';
 
@@ -207,7 +208,7 @@ function LandingFocused({go, theme, showStickers, bgKey, onCardHover}) {
 // ============================================================
 // LAYOUT 2 — Editorial : compact hero + live event rails
 // ============================================================
-function LandingEditorial({go, theme, cardProps, bgKey, onCardHover}) {
+function LandingEditorial({go, theme, cardProps, bgKey, onCardHover, events}) {
   return (
     <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif', position: 'relative', zIndex: 1}}>
       <motion.section 
@@ -232,7 +233,7 @@ function LandingEditorial({go, theme, cardProps, bgKey, onCardHover}) {
       </motion.section>
 
       <div style={{maxWidth:1256, margin:'0 auto', padding:'40px clamp(20px,4vw,48px) 72px'}}>
-        {(()=>{ const lanes = dedupeLanes([ROWS[0], ROWS[1], ROWS[2]]); return <>
+        {(()=>{ const lanes = dedupeLanes([ROWS[0], ROWS[1], ROWS[2]], 4, [], events); return <>
           <LandingRail title="Happening this week" sub="Fresh things to do, updated daily" events={lanes[0].events} cardProps={cardProps}/>
           <LandingRail title="Free things to do" sub="Great days out that cost nothing" events={lanes[1].events} cardProps={cardProps}/>
           <LandingRail title="Festivals on now" sub="Children's Season, Winnie the Pooh and more" events={lanes[2].events} cardProps={cardProps}/>
@@ -246,8 +247,8 @@ function LandingEditorial({go, theme, cardProps, bgKey, onCardHover}) {
 // ============================================================
 // LAYOUT 3 — Spotlight : split hero w/ live "This week's picks"
 // ============================================================
-function LandingSpotlight({go, theme, cardProps, bgKey, onCardHover}) {
-  const picks = EVENTS.filter(e=>e.status!=='expired' && (e.when.includes('today')||e.when.includes('week'))).slice(0,4);
+function LandingSpotlight({go, theme, cardProps, bgKey, onCardHover, events}) {
+  const picks = events.filter(e=>e.status!=='expired' && (e.when.includes('today')||e.when.includes('week'))).slice(0,4);
   const yellow = theme.key==='yellow';
   return (
     <div style={{background:'#F5F5F0', fontFamily:'Manrope, sans-serif', position: 'relative', zIndex: 1}}>
@@ -291,7 +292,7 @@ function LandingSpotlight({go, theme, cardProps, bgKey, onCardHover}) {
       </motion.section>
 
       <div style={{maxWidth:1256, margin:'0 auto', padding:'40px clamp(20px,4vw,48px) 72px'}}>
-        {(()=>{ const lanes = dedupeLanes([ROWS[1], ROWS[5]], 4, picks.map(p=>p.id)); return <>
+        {(()=>{ const lanes = dedupeLanes([ROWS[1], ROWS[5]], 4, picks.map(p=>p.id), events); return <>
           <LandingRail title="Free things to do" sub="Great days out that cost nothing" events={lanes[0].events} cardProps={cardProps}/>
           <LandingRail title="Outdoor and active" sub="Parks, beaches and playgrounds" events={lanes[1].events} cardProps={cardProps}/>
         </>; })()}
@@ -311,7 +312,17 @@ export function Landing({go, themeKey, showStickers=true, homeLayout='focused', 
   const currentThemeKey = colors[colorIndex];
   const theme = HERO_THEMES[currentThemeKey] || HERO_THEMES.green;
   const cardProps = (e)=>({ onOpen:()=>go('detail', e), onShare:()=>onShare(e) });
-  
+
+  // Live events for the "Happening this week" / "This week's picks" rails —
+  // starts from the static snapshot so the rails aren't empty on first paint,
+  // then swaps to live Supabase data (see liveEvents.js). Without this swap,
+  // these rails silently show whatever was true when data.jsx was generated,
+  // forever — that's the bug this fetch fixes.
+  const [events, setEvents] = React.useState(INITIAL_EVENTS);
+  React.useEffect(() => {
+    fetchLiveEvents().then(setEvents);
+  }, []);
+
   React.useEffect(() => {
     if (isPaused) return;
     // Start first color rotation after 5 seconds
@@ -336,8 +347,8 @@ export function Landing({go, themeKey, showStickers=true, homeLayout='focused', 
       <div style={{position: 'absolute', inset: 0, background: theme.bg, zIndex: 0}} />
       
       <AnimatePresence initial={false}>
-        {homeLayout==='editorial' ? <LandingEditorial key={currentThemeKey} go={go} theme={theme} cardProps={cardProps} bgKey={currentThemeKey} onCardHover={setIsPaused}/>
-          : homeLayout==='spotlight' ? <LandingSpotlight key={currentThemeKey} go={go} theme={theme} cardProps={cardProps} bgKey={currentThemeKey} onCardHover={setIsPaused}/>
+        {homeLayout==='editorial' ? <LandingEditorial key={currentThemeKey} go={go} theme={theme} cardProps={cardProps} bgKey={currentThemeKey} onCardHover={setIsPaused} events={events}/>
+          : homeLayout==='spotlight' ? <LandingSpotlight key={currentThemeKey} go={go} theme={theme} cardProps={cardProps} bgKey={currentThemeKey} onCardHover={setIsPaused} events={events}/>
           : <LandingFocused key={currentThemeKey} go={go} theme={theme} showStickers={showStickers} bgKey={currentThemeKey} onCardHover={setIsPaused}/>}
       </AnimatePresence>
     </div>

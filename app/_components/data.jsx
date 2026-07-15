@@ -3607,10 +3607,14 @@ export const ROWS = [
 // already shown elsewhere above the lanes (e.g. a hero picks panel).
 // Used by homepage/browse swim lanes only — "view all" / filtered category grids
 // deliberately keep their full, overlapping lists.
-export function dedupeLanes(rows, lead = 4, seed = []){
+// `eventsSource` defaults to the static snapshot for any caller that hasn't
+// migrated to live data yet, but Browse.jsx and Landing.jsx both pass the
+// live-fetched array (see liveEvents.js) so lanes reflect real dates/status,
+// not whatever was true when this file was generated.
+export function dedupeLanes(rows, lead = 4, seed = [], eventsSource = EVENTS){
   const shownLead = new Set(seed);
   return rows.map(r=>{
-    const all = EVENTS.filter(r.filter);
+    const all = eventsSource.filter(r.filter);
     const fresh = [], repeat = [];
     for(const e of all) (shownLead.has(e.id) ? repeat : fresh).push(e);
     const events = [...fresh, ...repeat];
