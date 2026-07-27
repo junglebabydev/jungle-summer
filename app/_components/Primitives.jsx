@@ -2,6 +2,7 @@
 // Primitives — icons + shared controls for Summer in SG
 // ============================================================
 import React, { useState, useEffect, useRef } from "react";
+import { currentMonthLabel } from "./currentMonth.js";
 
 // ---- Icons (Lucide-style, 2px stroke, currentColor) ----
 export const Ico = {
@@ -584,8 +585,8 @@ export function TopBanner({ go }) {
       <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
         <span style={{ color: "#009B4D" }}>{Ico.sun(15)}</span>
         {isMobile
-          ? "School holidays are here."
-          : "School holidays are here. Dozens of things on in June."}
+          ? `Things to do this ${currentMonthLabel()}.`
+          : `Things to do this ${currentMonthLabel()}. Dozens of family-friendly picks across Singapore.`}
       </span>
       <a
         href="#"

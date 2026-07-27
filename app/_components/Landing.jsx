@@ -12,6 +12,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EVENTS as INITIAL_EVENTS, ROWS, IMG, priceText, dedupeLanes } from './data.jsx';
 import { fetchLiveEvents } from './liveEvents.js';
+import { currentMonthLabel } from './currentMonth.js';
 import { Ico, Button, MetaPill, Nav, Footer } from './Primitives.jsx';
 import { EventCard } from './EventCard.jsx';
 
@@ -182,7 +183,7 @@ function LandingFocused({go, theme, showStickers, bgKey, onCardHover}) {
       {showStickers && <FloatStickers/>}
       <div style={{flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'40px 20px 72px', position:'relative', zIndex:2}}>
         <div style={{display:'inline-flex', alignItems:'center', gap:8, whiteSpace:'nowrap', background: theme.key==='yellow'?'rgba(12,60,38,.10)':'rgba(255,255,255,.16)', border:`1px solid ${theme.key==='yellow'?'rgba(12,60,38,.22)':'rgba(255,255,255,.4)'}`, color:theme.nav.fg, borderRadius:9999, padding:'8px 16px', fontSize:13, fontWeight:700, marginBottom:30, backdropFilter:'blur(6px)'}}>
-          {Ico.cal(15)} June school holidays · 2 to 30 June
+          {Ico.cal(15)} Things to do this {currentMonthLabel()}
         </div>
         <div style={{marginBottom:34}}><StickerWordmark theme={theme}/></div>
         <motion.div 
@@ -192,8 +193,8 @@ function LandingFocused({go, theme, showStickers, bgKey, onCardHover}) {
           onMouseEnter={() => onCardHover && onCardHover(true)}
           onMouseLeave={() => onCardHover && onCardHover(false)}
           style={{background:'#fff', borderRadius:26, boxShadow:'0 26px 70px rgba(0,0,0,.24)', padding:'clamp(28px,4vw,44px)', maxWidth:560, width:'100%', textAlign:'center', border:'1px solid rgba(0,0,0,.04)'}}>
-          <h1 style={{fontFamily:'"Feather Bold", serif', fontSize:'clamp(30px,4.4vw,42px)', color:'#0C3C26', margin:'0 0 14px', lineHeight:1.06}}>Find something fun to do this June</h1>
-          <p style={{fontSize:16.5, color:'#666', lineHeight:1.55, margin:'0 auto 26px', maxWidth:440}}>Singapore has dozens of free and low-cost things happening this school holiday. Tell us a bit about your family and we'll show you what's on.</p>
+          <h1 style={{fontFamily:'"Feather Bold", serif', fontSize:'clamp(30px,4.4vw,42px)', color:'#0C3C26', margin:'0 0 14px', lineHeight:1.06}}>Find something fun to do this {currentMonthLabel()}</h1>
+          <p style={{fontSize:16.5, color:'#666', lineHeight:1.55, margin:'0 auto 26px', maxWidth:440}}>Singapore has dozens of free and low-cost things happening this {currentMonthLabel()}. Tell us a bit about your family and we'll show you what's on.</p>
           <HeroCTAs go={go}/>
           <div style={{fontSize:13, color:'#858585', marginTop:20, display:'flex', alignItems:'center', justifyContent:'center', gap:7}}>
             <span style={{color:'#009B4D'}}>{Ico.check(15)}</span> Free to browse. No sign-up needed.
@@ -222,10 +223,10 @@ function LandingEditorial({go, theme, cardProps, bgKey, onCardHover, events}) {
         <Nav go={go} theme={theme.nav}/>
         <div style={{maxWidth:1256, margin:'0 auto', padding:'44px clamp(20px,4vw,48px) 64px', position:'relative', zIndex:2, textAlign:'center'}}>
           <div style={{display:'inline-flex', alignItems:'center', gap:8, whiteSpace:'nowrap', background: theme.key==='yellow'?'rgba(12,60,38,.10)':'rgba(255,255,255,.16)', border:`1px solid ${theme.key==='yellow'?'rgba(12,60,38,.22)':'rgba(255,255,255,.4)'}`, color:theme.nav.fg, borderRadius:9999, padding:'7px 15px', fontSize:13, fontWeight:700, marginBottom:22, backdropFilter:'blur(6px)'}}>
-            {Ico.cal(15)} June school holidays · 2 to 30 June
+            {Ico.cal(15)} Things to do this {currentMonthLabel()}
           </div>
           <div style={{display:'flex', justifyContent:'center', marginBottom:18}}><StickerWordmark theme={theme} size="md"/></div>
-          <p style={{fontSize:'clamp(16px,2vw,19px)', color:theme.sub, maxWidth:600, margin:'0 auto 26px', lineHeight:1.5, fontWeight:500}}>Dozens of free and low-cost things to do with the kids this school holiday. Scroll through what's on, or tell us about your family.</p>
+          <p style={{fontSize:'clamp(16px,2vw,19px)', color:theme.sub, maxWidth:600, margin:'0 auto 26px', lineHeight:1.5, fontWeight:500}}>Dozens of free and low-cost things to do with the kids this {currentMonthLabel()}. Scroll through what's on, or tell us about your family.</p>
           <div style={{marginBottom:24}}><HeroCTAs go={go}/></div>
           <div style={{display:'flex', justifyContent:'center'}}><HeroChips theme={theme} go={go}/></div>
         </div>
@@ -265,10 +266,10 @@ function LandingSpotlight({go, theme, cardProps, bgKey, onCardHover, events}) {
           {/* left */}
           <div>
             <div style={{display:'inline-flex', alignItems:'center', gap:8, whiteSpace:'nowrap', background: yellow?'rgba(12,60,38,.10)':'rgba(255,255,255,.16)', border:`1px solid ${yellow?'rgba(12,60,38,.22)':'rgba(255,255,255,.4)'}`, color:theme.nav.fg, borderRadius:9999, padding:'7px 15px', fontSize:13, fontWeight:700, marginBottom:22, backdropFilter:'blur(6px)'}}>
-              {Ico.cal(15)} June school holidays · 2 to 30 June
+              {Ico.cal(15)} Things to do this {currentMonthLabel()}
             </div>
             <StickerWordmark theme={theme} size="md" align="left"/>
-            <p style={{fontSize:'clamp(16px,1.7vw,18.5px)', color:theme.sub, maxWidth:480, margin:'18px 0 26px', lineHeight:1.5, fontWeight:500}}>Singapore has dozens of free and low-cost things happening this June. Here's a taste of what's on right now.</p>
+            <p style={{fontSize:'clamp(16px,1.7vw,18.5px)', color:theme.sub, maxWidth:480, margin:'18px 0 26px', lineHeight:1.5, fontWeight:500}}>Singapore has dozens of free and low-cost things happening this {currentMonthLabel()}. Here's a taste of what's on right now.</p>
             <HeroCTAs go={go} justify="flex-start"/>
             <div style={{marginTop:24}}><HeroChips theme={theme} go={go}/></div>
           </div>
@@ -285,7 +286,7 @@ function LandingSpotlight({go, theme, cardProps, bgKey, onCardHover, events}) {
               {picks.map(e=>(<PickItem key={e.id} e={e} onOpen={()=>go('detail',e)}/>))}
             </div>
             <button onClick={()=>go('browse')} style={{width:'100%', marginTop:10, height:46, borderRadius:12, border:'1px solid #DDD', background:'#fff', color:'#0C3C26', fontWeight:700, fontSize:14.5, cursor:'pointer', fontFamily:'inherit', display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6}}
-              onMouseEnter={e=>e.currentTarget.style.background='#F5F5F0'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>See everything on this June {Ico.chev(16)}</button>
+              onMouseEnter={e=>e.currentTarget.style.background='#F5F5F0'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>See everything on this {currentMonthLabel()} {Ico.chev(16)}</button>
           </div>
         </div>
         <div style={{height:48, background:'linear-gradient(180deg, transparent, #F5F5F0)'}}/>

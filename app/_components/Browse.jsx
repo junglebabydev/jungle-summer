@@ -7,6 +7,7 @@ import { Ico, Button } from "./Primitives.jsx";
 import { EventCard } from "./EventCard.jsx";
 import { MapIcon } from "lucide-react";
 import { fetchLiveEvents } from './liveEvents.js';
+import { currentMonthLabel } from './currentMonth.js';
 import MapboxMap from './MapboxWrapper.jsx';
 
 // Helper function to get simple price text for map display
@@ -1504,7 +1505,7 @@ export function Browse({ go, tweaks, onShare, initialFilters }) {
               margin: "2px 0 4px",
             }}
           >
-            Things to do this June
+            Things to do this {currentMonthLabel()}
           </h1>
           <div style={{ color: "#666", fontSize: 15, marginBottom: 18 }}>
             {filtered.length} {filtered.length === 1 ? "thing" : "things"} to do

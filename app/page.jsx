@@ -8,6 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FILTERS } from './_components/data.jsx';
+import { currentMonthLabel } from './_components/currentMonth.js';
 import { Ico, Button, TopBanner, Nav, Footer } from './_components/Primitives.jsx';
 import { Landing, HERO_THEMES } from './_components/Landing.jsx';
 import { Browse } from './_components/Browse.jsx';
@@ -40,7 +41,7 @@ function FamilyWizard({onClose, onDone}) {
 
   const steps = [
     { q:'How old are your kids?', sub:'We will match the right age range.', opts:FILTERS.age, val:age, set:setAge },
-    { q:'When are you free?', sub:'June is packed. Let us narrow it down.', opts:FILTERS.when, val:when, set:setWhen },
+    { q:'When are you free?', sub:`${currentMonthLabel()} is packed. Let us narrow it down.`, opts:FILTERS.when, val:when, set:setWhen },
   ];
   const s = steps[step];
   return (
