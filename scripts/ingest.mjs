@@ -99,10 +99,18 @@ if (newOnly) {
 const rows = raw.map(toRecord).filter((r) => r.slug);
 
 // Skip slugs that already exist (idempotent).
+// Query in batches: a single `slug=in.(…)` holding the whole delta produces a
+// URL big enough that the response blows Node's 16KB header cap and the run
+// dies with UND_ERR_HEADERS_OVERFLOW before writing anything. Hit for real on
+// the 2026-09-07 run at 470 delta rows.
+const SLUG_BATCH = 100;
 const slugs = rows.map((r) => r.slug);
-const existing = new Set(
-  (await rest(`/things_to_do?select=slug&slug=in.(${slugs.map((s) => `"${s}"`).join(',')})`)).map((r) => r.slug)
-);
+const existing = new Set();
+for (let i = 0; i < slugs.length; i += SLUG_BATCH) {
+  const batch = slugs.slice(i, i + SLUG_BATCH);
+  const found = await rest(`/things_to_do?select=slug&slug=in.(${batch.map((s) => `"${s}"`).join(',')})`);
+  for (const r of found) existing.add(r.slug);
+}
 
 const live = [], held = [], skipped = [];
 for (const r of rows) {
