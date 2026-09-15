@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { EVENTS } from '../_components/data.jsx';
+import { supabase } from '@/lib/supabase';
+import { transformRecord } from '../_components/liveEvents.js';
 import { TopBanner, Nav, Footer } from '../_components/Primitives.jsx';
 import { EventDetail } from '../_components/EventDetail.jsx';
 import { ShareModal } from '../_components/ShareModal.jsx';
@@ -14,13 +16,46 @@ export default function EventPage({ params }) {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    // Find the event by ID
-    const foundEvent = EVENTS.find(e => e.id === resolvedParams.eventId);
-    if (foundEvent) {
-      setEvent(foundEvent);
-    } else {
-      setNotFound(true);
-    }
+    // Look the listing up in Supabase, which is where every published listing
+    // actually lives. The static `EVENTS` snapshot shares no ids with the table,
+    // so resolving against it alone meant every deep link — including the ones
+    // this page's own Share button hands out — answered "Event not found".
+    // The snapshot stays as the offline fallback, nothing more.
+    let cancelled = false;
+
+    const load = async () => {
+      const slug = resolvedParams.eventId;
+
+      try {
+        const { data, error } = await supabase
+          .from('things_to_do')
+          .select('*')
+          .eq('slug', slug)
+          .eq('review_status', 'approved')
+          .in('status', ['active', 'expired'])
+          .maybeSingle();
+
+        if (cancelled) return;
+
+        if (!error && data) {
+          setEvent(transformRecord(data));
+          return;
+        }
+      } catch {
+        // Fall through to the snapshot rather than showing "not found" for what
+        // may only be a network blip.
+      }
+
+      if (cancelled) return;
+      const fallback = EVENTS.find((e) => e.id === slug);
+      if (fallback) setEvent(fallback);
+      else setNotFound(true);
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [resolvedParams.eventId]);
 
   const go = (s, payload) => {

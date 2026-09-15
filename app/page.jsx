@@ -87,6 +87,27 @@ export default function App(){
     if (saved && saved !== 'landing') setScreen(saved);
   }, []);
 
+  // A link that names a lane — /?price=free, /?type=Festival, /?when=week —
+  // opens the browse results already filtered to it. Without this the site has
+  // no addressable lanes at all: every rail and chip flips client state, so an
+  // outside link (the marketplace home page rails, a shared URL, a campaign)
+  // could only ever point at the landing page and leave the parent to find it
+  // again. Declared after the saved-screen restore above so it wins: an
+  // explicit link beats whatever screen this browser was last left on.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const filters = {};
+    for (const key of ['age', 'when', 'area', 'price', 'type']) {
+      const value = params.get(key);
+      if (value) filters[key] = value;
+    }
+    if (Object.keys(filters).length === 0) return;
+    setPrefilter(filters);
+    setScreen('browse');
+    localStorage.setItem('sg-screen', 'browse');
+  }, []);
+
   const go = (s, payload)=>{
     if (s==='browse' && payload && payload.wizard){ setWizard(true); return; }
     if (s==='browse' && payload && payload.filters) {
